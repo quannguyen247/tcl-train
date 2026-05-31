@@ -29,6 +29,11 @@
 # ==============================================================================
 
 proc accumulate {varname values body} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    upvar 1 $varname var
+    set res {}
+    foreach val $values {
+        set var $val
+        lappend res [uplevel 1 $body]
+    }
+    return $res
 }
-
