@@ -29,25 +29,39 @@
 # YOUR SOLUTION CODE BELOW
 # ==============================================================================
 
-# Determine if a list of YYYY-MM-DD birthdates contains
-# any shared birthdays.
-
 proc sharedBirthday {birthdays} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    array set seen {}
+    foreach b $birthdays {
+        set md [string range $b 5 9]
+        if {[info exists seen($md)]} {
+            return true
+        }
+        set seen($md) 1
+    }
+    return false
 }
-
-# Generate a list of $count random dates in YYYY-MM-DD form.
-# Do not include leap years.
 
 proc randomBirthdates {count} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    set res {}
+    set days_in_month {31 28 31 30 31 30 31 31 30 31 30 31}
+    for {set i 0} {$i < $count} {incr i} {
+        set month [expr {int(rand() * 12) + 1}]
+        set max_day [lindex $days_in_month [expr {$month - 1}]]
+        set day [expr {int(rand() * $max_day) + 1}]
+        set year [expr {int(rand() * 50) + 1970}]
+        lappend res [format "%04d-%02d-%02d" $year $month $day]
+    }
+    return $res
 }
-
-# Estimate the probability that 2 people in a group of given size
-# have the same birthday.
 
 proc estimatedProbabilityOfSharedBirthday {size} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    set trials 1000
+    set shared 0
+    for {set i 0} {$i < $trials} {incr i} {
+        set dates [randomBirthdates $size]
+        if {[sharedBirthday $dates]} {
+            incr shared
+        }
+    }
+    return [expr {double($shared) / $trials}]
 }
-
-
