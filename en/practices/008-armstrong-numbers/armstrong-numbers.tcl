@@ -21,6 +21,11 @@
 # ==============================================================================
 
 proc isArmstrongNumber {number} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    set digits [split $number ""]
+    set len [llength $digits]
+    set sum 0
+    foreach d $digits {
+        set sum [expr {$sum + wide($d) ** $len}]
+    }
+    return [expr {$sum == $number}]
 }
-
