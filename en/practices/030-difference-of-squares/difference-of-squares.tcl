@@ -21,14 +21,14 @@
 # ==============================================================================
 
 proc squareOfSum {n} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    set s [expr {$n * ($n + 1) / 2}]
+    return [expr {$s * $s}]
 }
 
 proc sumOfSquares {n} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    return [expr {$n * ($n + 1) * (2 * $n + 1) / 6}]
 }
 
 proc differenceOfSquares {n} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    return [expr {[squareOfSum $n] - [sumOfSquares $n]}]
 }
-
