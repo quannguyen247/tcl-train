@@ -34,10 +34,47 @@
 # [inkscape]: https://en.wikipedia.org/wiki/Inkscape
 
 # ==============================================================================
-# YOUR SOLUTION CODE BELOW
+# ALGORITHM & GEOMETRY NOTES
+# ==============================================================================
+# 1. CIRCULAR TARGET VS SQUARE BOUNDS:
+#    - Darts target consists of CONCENTRIC CIRCLES of radius 10, 5, and 1.
+#    - Do NOT use square bounds like `x >= 5 && y >= 5 && x <= 10 && y <= 10`.
+#
+# 2. EUCLIDEAN DISTANCE IN TCL:
+#    - Distance r from (x,y) to (0,0) is r = sqrt(x^2 + y^2).
+#    - Use Tcl's built-in `hypot($x, $y)` math function: `set r [expr {hypot($x, $y)}]`.
+#
+# 3. TCL SYNTAX REMINDERS:
+#    - Negative coordinates are valid (quadrants 2, 3, 4).
+#    - Keep `} elseif {` and `} else {` on the SAME LINE.
 # ==============================================================================
 
 proc score {x y} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    set r [expr {hypot($x, $y)}]
+
+    if {$r > 10} {
+        return 0
+    } elseif {$r > 5} {
+        return 1
+    } elseif {$r > 1} {
+        return 5
+    } else {
+        return 10
+    }
 }
 
+
+
+
+proc score {x y} {
+    set dist [expr {hypot($x, $y)}]
+    if {$dist <= 1.0} {
+        return 10
+    } elseif {$dist <= 5.0} {
+        return 5
+    } elseif {$dist <= 10.0} {
+        return 1
+    } else {
+        return 0
+    }
+}

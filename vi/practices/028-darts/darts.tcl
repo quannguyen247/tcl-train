@@ -34,10 +34,51 @@
 # [inkscape]: https://en.wikipedia.org/wiki/Inkscape
 
 # ==============================================================================
-# YOUR SOLUTION CODE BELOW
+# KỸ THUẬT & LƯU Ý BÀI TOÁN (ALGORITHM & GEOMETRY NOTES)
+# ==============================================================================
+# 1. BÃI BẪY HÌNH TRÒN VS HÌNH VUÔNG:
+#    - Bia phi tiêu là HÌNH TRÒN có bán kính r = 10, 5, 1.
+#    - KHÔNG ĐƯỢC dùng điều kiện kiểu hình vuông: `x >= 5 && y >= 5 && x <= 10 && y <= 10`
+#      vì sẽ tính sai các điểm nằm ở góc (ví dụ (8,8) r = 11.31 văng ra ngoài bia nhưng vẫn lọt hình vuông).
+#
+# 2. CÔNG THỨC KHOẢNG CÁCH TRONG TCL:
+#    - Khoảng cách từ (x,y) tới tâm (0,0): r = sqrt(x^2 + y^2).
+#    - Trong Tcl, dùng hàm toán học `hypot($x, $y)` sẵn có trong `expr`:
+#      `set r [expr {hypot($x, $y)}]`
+#
+# 3. LƯU Ý CÚ PHÁP TCL:
+#    - Tọa độ âm (x < 0, y < 0) hoàn toàn HOÀN HẢO và HỢP LỆ (nằm ở các góc phần tư 2, 3, 4).
+#    - Bắt buộc dùng `elseif` hoặc `} else {` trên CÙNG 1 DÒNG.
 # ==============================================================================
 
 proc score {x y} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    # 1. Tính khoảng cách bán kính r từ (x,y) tới tâm (0,0)
+    set r [expr {hypot($x, $y)}]
+
+    # 2. Xử lý điểm dựa trên bán kính r
+    if {$r > 10} {
+        return 0
+    } elseif {$r > 5} {
+        return 1
+    } elseif {$r > 1} {
+        return 5
+    } else {
+        return 10
+    }
 }
 
+
+
+
+proc score {x y} {
+    set dist [expr {hypot($x, $y)}]
+    if {$dist <= 1.0} {
+        return 10
+    } elseif {$dist <= 5.0} {
+        return 5
+    } elseif {$dist <= 10.0} {
+        return 1
+    } else {
+        return 0
+    }
+}
