@@ -13,9 +13,94 @@
 # YOUR SOLUTION CODE BELOW
 # ==============================================================================
 
-oo::class create Set {
-    constructor {args} {
-        throw {NOT_IMPLMEMENTED} "Implement this class."
+oo::class create CustomSet {
+    variable elems
+
+    constructor {{elements {}}} {
+        set elems {}
+        foreach e $elements {
+            if {[lsearch -exact $elems $e] == -1} {
+                lappend elems $e
+            }
+        }
+    }
+
+    method getElements {} {
+        return $elems
+    }
+
+    method empty? {} {
+        return [expr {[llength $elems] == 0}]
+    }
+
+    method contains? {element} {
+        return [expr {[lsearch -exact $elems $element] != -1}]
+    }
+
+    method subset? {otherSet} {
+        foreach e $elems {
+            if {![$otherSet contains? $e]} {
+                return false
+            }
+        }
+        return true
+    }
+
+    method disjoint? {otherSet} {
+        foreach e $elems {
+            if {[$otherSet contains? $e]} {
+                return false
+            }
+        }
+        return true
+    }
+
+    method equals? {otherSet} {
+        return [expr {[my subset? $otherSet] && [$otherSet subset? [self]]}]
+    }
+
+    method add {element} {
+        if {![my contains? $element]} {
+            lappend elems $element
+        }
+        return [self]
+    }
+
+    method intersection {otherSet} {
+        set res {}
+        foreach e $elems {
+            if {[$otherSet contains? $e]} {
+                lappend res $e
+            }
+        }
+        return [CustomSet new $res]
+    }
+
+    method difference {otherSet} {
+        set res {}
+        foreach e $elems {
+            if {![$otherSet contains? $e]} {
+                lappend res $e
+            }
+        }
+        return [CustomSet new $res]
+    }
+
+    method union {otherSet} {
+        set res $elems
+        foreach e [$otherSet getElements] {
+            if {[lsearch -exact $res $e] == -1} {
+                lappend res $e
+            }
+        }
+        return [CustomSet new $res]
+    }
+
+    method size {} {
+        return [llength $elems]
+    }
+
+    method toList {} {
+        return [lsort -integer $elems]
     }
 }
-
