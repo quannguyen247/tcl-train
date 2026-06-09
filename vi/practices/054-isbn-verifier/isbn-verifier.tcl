@@ -45,10 +45,34 @@
 # [isbn-verification]: https://en.wikipedia.org/wiki/International_Standard_Book_Number
 
 # ==============================================================================
-# YOUR SOLUTION CODE BELOW
+# KỸ THUẬT & GIẢI THÍCH (ALGORITHM & TCL SYNTAX)
+# ==============================================================================
+# 1. TIỀN XỬ LÝ CHUỖI:
+#    - Dùng `string map {- ""} $isbn` để xóa bỏ toàn bộ dấu gạch ngang '-'.
+#
+# 2. KIỂM TRA ĐỊNH DẠNG BẰNG REGEXP:
+#    - `{^[0-9]{9}[0-9X]$}`: Bắt buộc đúng 9 chữ số (0-9) + 1 chữ số cuối (0-9 hoặc X).
+#    - Nếu không khớp mẫu $\rightarrow$ Trả về `false` ngay lập tức.
+#
+# 3. TÍNH TỔNG TÍCH & KIỂM TRA CHIA HẾT CHO 11:
+#    - Duyệt 10 ký tự: `val` = ký tự 'X' thì lấy 10, ngược lại lấy chính chữ số đó.
+#    - Cộng dồn: `sum += val * (10 - i)`.
+#    - Kết quả: `expr {$sum % 11 == 0}`.
 # ==============================================================================
 
 proc isValid {isbn} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    set clean [string map {- ""} $isbn]
+    if {![regexp {^\d{9}[\dX]$} $clean]} { return false }
+
+    set sum 0
+    set weight 10
+    foreach char [split $clean ""] {
+        set val [expr {$char eq "X" ? 10 : $char}]
+        incr sum [expr {$val * $weight}]
+        incr weight -1
+    }
+    return [expr {$sum % 11 == 0}]
 }
+
+
 

@@ -1,13 +1,16 @@
+#!/usr/bin/env tclsh
+package require tcltest
+namespace import ::tcltest::*
 #############################################################
 # Override some tcltest procs with additional functionality
 
 # Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
+proc skip {args} {
+    if {!( [info exists ::env(RUN_ALL)] && 
+           [string is boolean -strict $::env(RUN_ALL)] &&
+           $::env(RUN_ALL)
+    )} {
+        uplevel 1 [list ::tcltest::skip {*}$args]
     }
 }
 
@@ -22,6 +25,43 @@ proc cleanupTests {} {
 #############################################################
 # Some procs that are handy for Tcl test custom matching.
 # ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
+
+# Copy the needed procs into your test file.  Use it like this:
+#
+#    customMatch dictionary dictionaryMatch
+#    test name "description" -body {
+#        code that returns a dictionary
+#    } -match dictionary -result {expected dictionary value here}
+
+
+# Compare two dictionaries for the same keys and same values
+proc dictionaryMatch {expected actual} {
+    if {[dict size $expected] != [dict size $actual]} {
+        return false
+    }
+    dict for {key value} $expected {
+        if {![dict exists $actual $key]} {
+            return false
+        }
+        set actualValue [dict get $actual $key]
+
+        # if this value is a dict then recurse, 
+        # else just check for string equality
+        if {[string is list -strict $value] &&
+            [llength $value] > 1 && 
+            [llength $value] % 2 == 0
+        } {
+            set procname [lindex [info level 0] 0]
+            if {![$procname $value $actualValue]} {
+                return false
+            }
+        } elseif {$actualValue ne $value} {
+            return false
+        }
+    }
+    return true
+}
+customMatch dictionary dictionaryMatch
 
 
 # Since Tcl boolean values can be more than just 0/1...
@@ -42,3 +82,172 @@ proc booleanMatch {expected actual} {
     }]
 }
 customMatch boolean booleanMatch
+
+
+# Compare two ordered lists without comparing the lists themselves 
+# as strings.
+# e.g.
+#     set first {
+#         a  b  c
+#     }
+#     set second [list a b c]
+#     expr {$first eq $second}           ;# 0
+#     expr {$first == $second}           ;# 0
+#     orderedListsMatch $first $second   ;# true
+#
+proc orderedListsMatch {expected actual} {
+    if {[llength $expected] != [llength $actual]} {
+        return false
+    }
+    foreach e $expected a $actual {
+        if {$e != $a} {
+            return false
+        }
+    }
+    return true
+}
+customMatch orderedLists orderedListsMatch
+
+
+# two lists have the same elements, in no particular order
+proc unorderedListsMatch {expected actual} {
+    if {[llength $expected] != [llength $actual]} {
+        return false
+    }
+    foreach elem $expected {
+        if {[lsearch -exact $actual $elem] == -1} {
+            return false
+        }
+    }
+    return true
+}
+customMatch unorderedLists unorderedListsMatch
+
+
+# Compare two ordered lists without comparing the lists themselves 
+# as strings. Calls itself recursively.
+proc listOfListsMatch {expected actual} {
+    set procname [lindex [info level 0] 0]
+    if {[llength $expected] != [llength $actual]} {
+        return false
+    }
+    foreach e $expected a $actual {
+        if {[llength $e] > 1 ? (![$procname $e $a]) : ($e != $a)} {
+            return false
+        }
+    }
+    return true
+}
+customMatch listOfLists listOfListsMatch
+
+
+# The expected value is one of a list of values.
+proc inListMatch {expectedList actual} {
+    return [expr {$actual in $expectedList}]
+}
+customMatch inList inListMatch
+
+
+# Compare  numbers: for example 5.0 == 5
+proc numberMatch {expected actual} {
+    return [expr {$expected == $actual}]
+}
+customMatch numbers numberMatch
+
+
+# Compare floating point numbers 
+proc floatMatch {expected actual {epsilon 1e-6}} {
+    return [expr {abs($expected - $actual) <= $epsilon}]
+}
+customMatch float floatMatch
+
+
+# Compare floating point numbers 
+proc closeEnough {expected actual {epsilon 1.1}} {
+    return [expr {abs($expected - $actual) <= $epsilon}]
+}
+customMatch approxEqual closeEnough
+
+
+# Compare a list of floating point numbers 
+proc listOfFloatsMatch {expected actual} {
+    foreach e $expected a $actual {
+        if {![floatMatch $e $a]} {
+            return false
+        }
+    }
+    return true
+}
+
+#############################################################
+# Convenience function to set the precision of a real number.
+proc roundTo {precision number} {
+    return [format {%.*f} $precision $number]
+}
+
+
+############################################################
+source "diffie-hellman.tcl"
+
+test dh-1 "private key is in range 1..p" -body {
+    set result true
+    foreach p {5 7 11 13 17 19 23 29 31 37 41 43 47} {
+        set pk [diffieHellman::privateKey $p]
+        if {$pk <= 1 || $pk >= $p} {
+            set result false
+            break
+        }
+    }
+    set result
+} -returnCodes ok -match boolean -result true
+
+skip dh-2
+test dh-2 "private key is random" -body {
+    # there is a slim chance this test will fail
+    set privateKeys {}
+    foreach i {1 2 3 4 5} {
+        set pk [diffieHellman::privateKey 2147483647]
+        dict set privateKeys $pk 1
+    }
+    dict size $privateKeys
+} -returnCodes ok -result 5
+
+skip dh-3
+test dh-3 "can calculate public key using private key" -body {
+    set p 23
+    set g 5
+    set private 6
+    set publicKey [diffieHellman::publicKey $p $g $private]
+} -returnCodes ok -result 8
+
+skip dh-5
+test dh-5 "can calculate public key using aaa different privaate key" -body {
+    set p 23
+    set g 5
+    set private 15
+    set publicKey [diffieHellman::publicKey $p $g $private]
+} -returnCodes ok -result 19
+
+skip dh-5
+test dh-5 "can calculate secret key using other party's public key" -body {
+    set p 23
+    set public 19
+    set private 6
+    set secret [diffieHellman::secret $p $public $private]
+} -returnCodes ok -result 2
+
+skip dh-6
+test dh-6 "key exchange" -body {
+    set p 23
+    set g 5
+    set alicePrivateKey [diffieHellman::privateKey $p]
+    set bobPrivateKey [diffieHellman::privateKey $p]
+    set alicePublicKey [diffieHellman::publicKey $p $g $alicePrivateKey]
+    set bobPublicKey [diffieHellman::publicKey $p $g $bobPrivateKey]
+    set secretA [diffieHellman::secret $p $bobPublicKey $alicePrivateKey]
+    set secretB [diffieHellman::secret $p $alicePublicKey $bobPrivateKey]
+
+    expr {$secretA == $secretB}
+} -returnCodes ok -match boolean -result true
+
+cleanupTests

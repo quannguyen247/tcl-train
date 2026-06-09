@@ -74,4 +74,28 @@ puts "   Chuỗi gốc: '$text'"
 puts "   Đã trim khoảng trắng 2 đầu: '[string trim $text]'"
 puts "   Đã trim dấu '-': '$clean_str'"
 
+# 7. TÁCH CHUỖI THÀNH DANH SÁCH (SPLIT COMMAND) - CỰC KỲ PHỔ BIẾN
+# ------------------------------------------------------------------------------
+# Lệnh 'split' dùng để bóc tách chuỗi thành danh sách (List) theo ký tự phân cách:
+set isbn_raw "3-598-21508-8"
+
+set chars [split $isbn_raw ""]       ;# Tách từng ký tự một (chuỗi rỗng "")
+set parts [split $isbn_raw "-"]      ;# Tách theo dấu gạch ngang '-'
+
+puts "\n7. Tách chuỗi bằng 'split':"
+puts "   Chuỗi gốc: $isbn_raw"
+puts "   Tách từng ký tự (split \"\"): $chars"
+puts "   Tách theo dấu '-' (split \"-\"): $parts"
+
+# 8. KỸ THUẬT LÀM SẠCH CHUỖI (STRING CLEANING / PREPROCESSING)
+# ------------------------------------------------------------------------------
+# Trong thực tế, biến 'clean' thường dùng để lưu chuỗi đã loại bỏ ký tự rác:
+set raw_isbn "3-598-21507-X"
+set clean [string map {- ""} $raw_isbn]   ;# Xóa bỏ toàn bộ dấu gạch ngang '-'
+
+puts "\n8. Kỹ thuật làm sạch chuỗi (String Cleaning):"
+puts "   Chuỗi thô (raw_isbn): $raw_isbn"
+puts "   Chuỗi đã làm sạch (clean): $clean"
+
 puts "\n=== HOÀN THÀNH BÀI HỌC STRING MANIPULATION ==="
+

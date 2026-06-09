@@ -45,10 +45,34 @@
 # [isbn-verification]: https://en.wikipedia.org/wiki/International_Standard_Book_Number
 
 # ==============================================================================
-# YOUR SOLUTION CODE BELOW
+# ALGORITHM & TCL SYNTAX NOTES
+# ==============================================================================
+# 1. STRING PREPROCESSING:
+#    - Strip all hyphens using `string map {- ""} $isbn`.
+#
+# 2. PATTERN VALIDATION VIA REGEXP:
+#    - `{^[0-9]{9}[0-9X]$}`: Exactly 9 digits followed by 1 digit or 'X' at the end.
+#    - Returns `false` if format does not match.
+#
+# 3. CHECKSUM & MODULO 11:
+#    - Convert 'X' to 10.
+#    - Calculate weighted sum: `sum += val * (10 - i)`.
+#    - Return `expr {$sum % 11 == 0}`.
 # ==============================================================================
 
 proc isValid {isbn} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    set clean [string map {- ""} $isbn]
+    if {![regexp {^\d{9}[\dX]$} $clean]} { return false }
+
+    set sum 0
+    set weight 10
+    foreach char [split $clean ""] {
+        set val [expr {$char eq "X" ? 10 : $char}]
+        incr sum [expr {$val * $weight}]
+        incr weight -1
+    }
+    return [expr {$sum % 11 == 0}]
 }
+
+
 

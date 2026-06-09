@@ -74,4 +74,28 @@ puts "   Original String: '$text'"
 puts "   Trimmed Whitespace: '[string trim $text]'"
 puts "   Trimmed '-' characters: '$clean_str'"
 
+# 7. SPLITTING STRINGS INTO LISTS (SPLIT COMMAND)
+# ------------------------------------------------------------------------------
+# 'split' parses a string into a list using a delimiter string:
+set isbn_raw "3-598-21508-8"
+
+set chars [split $isbn_raw ""]       ;# Split into individual characters (empty delimiter "")
+set parts [split $isbn_raw "-"]      ;# Split by hyphen delimiter '-'
+
+puts "\n7. Splitting Strings with 'split':"
+puts "   Original ISBN: $isbn_raw"
+puts "   Characters (split \"\"): $chars"
+puts "   Hyphen Delimited (split \"-\"): $parts"
+
+# 8. STRING CLEANING & PREPROCESSING (DATA CLEANING)
+# ------------------------------------------------------------------------------
+# In practice, 'clean' is commonly used to store sanitized strings:
+set raw_isbn "3-598-21507-X"
+set clean [string map {- ""} $raw_isbn]   ;# Strip all hyphens '-'
+
+puts "\n8. String Cleaning & Preprocessing:"
+puts "   Raw Input (raw_isbn): $raw_isbn"
+puts "   Sanitized String (clean): $clean"
+
 puts "\n=== COMPLETED STRING MANIPULATION LESSON ==="
+
