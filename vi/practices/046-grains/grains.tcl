@@ -26,11 +26,11 @@ namespace eval grains {
     namespace ensemble create
 
     proc square {square} {
-        throw {NOT_IMPLEMENTED} "Implement this procedure."
+        return {}
     }
 
     proc total {} {
-        throw {NOT_IMPLEMENTED} "Implement this procedure."
+        return {}
     }
 }
 
