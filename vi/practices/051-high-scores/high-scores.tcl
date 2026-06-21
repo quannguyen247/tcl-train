@@ -17,23 +17,23 @@
 oo::class create HighScores {
 
     method addScores {args} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        return {}
     }
 
     method scores {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        return {}
     }
 
     method latest {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        return {}
     }
     
     method personalBest {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        return {}
     }
 
     method topThree {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        return {}
     }
 }
 
