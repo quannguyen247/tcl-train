@@ -81,6 +81,7 @@ oo::class create BinarySearchTree {
     variable leftNode
     variable rightNode
 
+    # Tạo node rỗng
     constructor {} {
         set value ""
         set leftNode ""
@@ -91,6 +92,7 @@ oo::class create BinarySearchTree {
         return $value
     }
 
+    # Chèn số vào nhánh phù hợp
     method insert {val} {
         if {$value eq ""} {
             set value $val
@@ -117,6 +119,7 @@ oo::class create BinarySearchTree {
     }
 
     method sorted {} {
+        # Duyệt trái, node hiện tại, rồi phải
         if {$value eq ""} {
             return {}
         }
@@ -126,6 +129,7 @@ oo::class create BinarySearchTree {
     }
 
     method map {varname body} {
+        # Áp dụng biểu thức theo thứ tự tăng dần
         upvar 1 $varname var
         set res {}
         if {$leftNode ne ""} {
