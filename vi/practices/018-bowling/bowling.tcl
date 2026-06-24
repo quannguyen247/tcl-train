@@ -69,74 +69,61 @@ oo::class create Bowling {
         set rolls {}
     }
 
+    # Nhận một lượt ném
     method roll {pins} {
-        if {$pins < 0 || $pins > 10} {
-            error "Pins must have a raw value conformant to the game rules"
-        }
+        if {$pins < 0} {error "Negative roll is invalid"}
+        if {$pins > 10} {error "Pin count exceeds pins on the lane"}
         if {[my isGameOver]} {
             error "Cannot roll after game is over"
         }
-        set frame_rolls [my getFrameRolls]
-        if {[llength $frame_rolls] == 1} {
-            set prev [lindex $frame_rolls 0]
-            if {$prev < 10 && [expr {$prev + $pins}] > 10} {
-                error "Pin count exceeds pins on the lane"
-            }
+
+        lassign [my currentFrame] frame frameRolls
+        if {([llength $frameRolls] == 1
+             && [lindex $frameRolls 0] < 10
+             && [expr {[lindex $frameRolls 0] + $pins}] > 10)
+            || ([llength $frameRolls] == 2
+                && [lindex $frameRolls 0] == 10
+                && [lindex $frameRolls 1] < 10
+                && [expr {[lindex $frameRolls 1] + $pins}] > 10)} {
+            error "Pin count exceeds pins on the lane"
         }
         lappend rolls $pins
     }
 
-    method getFrameRolls {} {
-        set r $rolls
+    # Tìm frame hiện tại
+    method currentFrame {} {
+        set remaining $rolls
         set frame 1
-        while {[llength $r] > 0 && $frame < 10} {
-            set first [lindex $r 0]
+        while {$frame < 10 && [llength $remaining] > 0} {
+            set first [lindex $remaining 0]
             if {$first == 10} {
-                set r [lrange $r 1 end]
+                set remaining [lrange $remaining 1 end]
+            } elseif {[llength $remaining] >= 2} {
+                set remaining [lrange $remaining 2 end]
             } else {
-                set r [lrange $r 2 end]
+                break
             }
             incr frame
         }
-        return $r
+        return [list $frame $remaining]
     }
 
+    # Kiểm tra game đã đủ 10 frame
     method isGameOver {} {
-        set r $rolls
-        set frame 1
-        while {[llength $r] > 0 && $frame <= 10} {
-            set first [lindex $r 0]
-            if {$frame < 10} {
-                if {$first == 10} {
-                    set r [lrange $r 1 end]
-                } else {
-                    if {[llength $r] < 2} { return false }
-                    set r [lrange $r 2 end]
-                }
-            } else {
-                if {$first == 10} {
-                    if {[llength $r] < 3} { return false }
-                    set bonus1 [lindex $r 1]
-                    set bonus2 [lindex $r 2]
-                    if {$bonus1 < 10 && [expr {$bonus1 + $bonus2}] > 10} {
-                        error "Pin count exceeds pins on the lane"
-                    }
-                    return true
-                } else {
-                    if {[llength $r] < 2} { return false }
-                    set second [lindex $r 1]
-                    if {[expr {$first + $second}] == 10} {
-                        return [expr {[llength $r] >= 3}]
-                    } else {
-                        return true
-                    }
-                }
-            }
-            incr frame
+        lassign [my currentFrame] frame frameRolls
+        if {$frame < 10 || [llength $frameRolls] < 2} {
+            return false
         }
-        return false
+        if {[lindex $frameRolls 0] == 10} {
+            return [expr {[llength $frameRolls] >= 3}]
+        }
+        if {[expr {[lindex $frameRolls 0] + [lindex $frameRolls 1]}] == 10} {
+            return [expr {[llength $frameRolls] >= 3}]
+        }
+        return true
     }
 
+    # Tính điểm và cộng bonus
     method score {} {
         if {![my isGameOver]} {
             error "Score cannot be taken until the end of the game"
