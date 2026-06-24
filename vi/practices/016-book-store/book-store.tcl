@@ -67,44 +67,57 @@
 # YOUR SOLUTION CODE BELOW
 # ==============================================================================
 
-proc basketCost {basket} {
-    array set counts {1 0 2 0 3 0 4 0 5 0}
-    foreach item $basket {
-        incr counts($item)
+proc minimumCost {counts memoName} {
+    upvar 1 $memoName memo
+    set counts [lsort -integer -decreasing $counts]
+
+    if {$counts eq {}} {
+        return 0
     }
-    set groups {}
-    while 1 {
-        set num_distinct 0
-        for {set b 1} {$b <= 5} {incr b} {
-            if {$counts($b) > 0} {
-                incr num_distinct
+    if {[dict exists $memo $counts]} {
+        return [dict get $memo $counts]
+    }
+
+    set prices {0 800 1520 2160 2560 3000}
+    set best 0
+    foreach count $counts {
+        incr best [expr {$count * 800}]
+    }
+
+    # Thử mọi nhóm sách khác nhau
+    set sizeCount [llength $counts]
+    for {set mask 1} {$mask < (1 << $sizeCount)} {incr mask} {
+        set next $counts
+        set groupSize 0
+
+        for {set i 0} {$i < $sizeCount} {incr i} {
+            if {$mask & (1 << $i)} {
+                lset next $i [expr {[lindex $next $i] - 1}]
+                incr groupSize
             }
         }
-        if {$num_distinct == 0} break
-        for {set b 1} {$b <= 5} {incr b} {
-            if {$counts($b) > 0} {
-                incr counts($b) -1
-            }
+
+        set next [lsearch -all -inline -not -exact $next 0]
+        set total [expr {
+            [lindex $prices $groupSize] + [minimumCost $next memo]
+        }]
+        if {$total < $best} {
+            set best $total
         }
-        lappend groups $num_distinct
     }
-    set count5 0
-    set count4 0
-    set count3 0
-    set count2 0
-    set count1 0
-    foreach g $groups {
-        if {$g == 5} { incr count5 }
-        if {$g == 4} { incr count4 }
-        if {$g == 3} { incr count3 }
-        if {$g == 2} { incr count2 }
-        if {$g == 1} { incr count1 }
+
+    # Lưu kết quả để không tính lại
+    dict set memo $counts $best
+    return $best
+}
+
+proc basketCost {books} {
+    # Đếm số bản của từng đầu sách
+    set copies {}
+    foreach book $books {
+        dict incr copies $book
     }
-    while {$count5 > 0 && $count3 > 0} {
-        incr count5 -1
-        incr count3 -1
-        incr count4 2
-    }
-    set total [expr {$count1 * 800 + $count2 * 1520 + $count3 * 2160 + $count4 * 2560 + $count5 * 3000}]
-    return $total
+
+    set memo {}
+    return [minimumCost [dict values $copies] memo]
 }
