@@ -27,35 +27,68 @@
 
 namespace eval listOps {
     proc append {listname values} {
-        throw {NOT_IMPLEMENTED} "Implement this procedure."
+        upvar 1 $listname list
+        foreach value $values {
+            lappend list $value
+        }
     }
 
     proc concat {listOfLists} {
-        throw {NOT_IMPLEMENTED} "Implement this procedure."
+        set result {}
+        foreach list $listOfLists {
+            foreach value $list {
+                lappend result $value
+            }
+        }
+        return $result
     }
 
     proc filter {list func} {
-        throw {NOT_IMPLEMENTED} "Implement this procedure."
+        set result {}
+        foreach value $list {
+            if {[apply $func $value]} {
+                lappend result $value
+            }
+        }
+        return $result
     }
 
     proc length {list} {
-        throw {NOT_IMPLEMENTED} "Implement this procedure."
+        set count 0
+        foreach value $list {
+            incr count
+        }
+        return $count
     }
 
     proc map {list func} {
-        throw {NOT_IMPLEMENTED} "Implement this procedure."
+        set result {}
+        foreach value $list {
+            lappend result [apply $func $value]
+        }
+        return $result
     }
 
     proc foldl {list accumulator func} {
-        throw {NOT_IMPLEMENTED} "Implement this procedure."
+        foreach value $list {
+            set accumulator [apply $func $accumulator $value]
+        }
+        return $accumulator
     }
 
     proc foldr {list accumulator func} {
-        throw {NOT_IMPLEMENTED} "Implement this procedure."
+        foreach value [reverse $list] {
+            set accumulator [apply $func $accumulator $value]
+        }
+        return $accumulator
     }
 
     proc reverse {list} {
-        throw {NOT_IMPLEMENTED} "Implement this procedure."
+        set result {}
+        foreach value $list {
+            set result [linsert $result 0 $value]
+        }
+        return $result
     }
 }
 
