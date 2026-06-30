@@ -1,4 +1,4 @@
-#############################################################
+package require tcltest; namespace import ::tcltest::*; #############################################################
 # Override some tcltest procs with additional functionality
 
 # Allow an environment variable to override `skip`
@@ -81,3 +81,4 @@ proc orderedListsMatch {expected actual} {
     }
     return true
 }
+
