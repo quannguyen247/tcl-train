@@ -34,3 +34,16 @@ set pin_csv "FF1/Q,U1/A,U1/Y,FF2/D"
 set pin_list [split $pin_csv ","]
 set path_string [join $pin_list " -> "]
 puts "Timing path: $path_string"
+
+# ==============================================================================
+# 8. KỸ THUẬT DUYỆT SONG SONG N HÀNG VỚI FOREACH TRONG EDA
+# ==============================================================================
+# Trong EDA, ta thường có cặp danh sách song song: {cell_name} và {pin_name}
+set cells {U_INV_01 U_NAND_02 U_FF_03}
+set pins  {Y        OUT       Q}
+
+# Duyệt song song 2 danh sách trong 1 vòng lặp foreach duy nhất
+foreach cell $cells pin $pins {
+    puts "Connecting Cell: $cell -> Output Pin: $pin"
+}
+

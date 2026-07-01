@@ -25,8 +25,25 @@ puts "Design: $design_name | FF Count: $flop_count | Scan Chains: $scan_chains"
 # 5. Release (delete) the 'flop_count' variable from memory using the appropriate command.
 unset flop_count
 
-# 6. Verify if the 'flop_count' variable still exists using the 'info exists' command and print the result.
+# 6. Verify if the# 6. Check if variable 'flop_count' exists using 'info exists' and print result.
 puts "flop_count exists: [info exists flop_count]"
 
-# Bonus: Print the username of the current logged-in user by querying the global platform array.
+# Bonus 1: Print current logged-in user using tcl_platform.
 puts "Current user: $tcl_platform(user)"
+
+# ==============================================================================
+# 7. COMMAND LINE ARGUMENTS ($argv0, $argc, $argv) & GLOBAL SCOPE (::varName)
+# ==============================================================================
+# In EDA tools (DC, PT, Tessent), Tcl scripts are executed via command line:
+# tclsh run_dft.tcl -design top_chip -chains 8
+# - $argv0: Script name ("run_dft.tcl")
+# - $argc : Number of arguments
+# - $argv : List containing input arguments
+
+if {[info exists argv0]} {
+    puts "Script name: $argv0 | Arg count: [expr {[info exists argc] ? $argc : 0}]"
+}
+
+# Global Namespace Scope Variable (using double colons ::)
+set ::GLOBAL_EDA_MODE "AUTOPROMOTE_SCAN"
+puts "Global EDA Mode: $::GLOBAL_EDA_MODE"

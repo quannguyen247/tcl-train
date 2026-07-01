@@ -34,3 +34,15 @@ set pin_csv "FF1/Q,U1/A,U1/Y,FF2/D"
 set pin_list [split $pin_csv ","]
 set path_string [join $pin_list " -> "]
 puts "Timing path: $path_string"
+
+# ==============================================================================
+# 8. PARALLEL FOREACH ITERATION IN EDA SCRIPTING
+# ==============================================================================
+# In EDA tools, we frequently process paired lists: {cell_names} and {pin_names}
+set cells {U_INV_01 U_NAND_02 U_FF_03}
+set pins  {Y        OUT       Q}
+
+# Iterate over multiple lists simultaneously in a single foreach loop
+foreach cell $cells pin $pins {
+    puts "Connecting Cell: $cell -> Output Pin: $pin"
+}

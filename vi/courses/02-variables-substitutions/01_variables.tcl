@@ -28,5 +28,22 @@ unset flop_count
 # 6. Kiểm tra xem biến 'flop_count' còn tồn tại hay không bằng lệnh 'info exists' và in kết quả ra màn hình.
 puts "flop_count exists: [info exists flop_count]"
 
-# Bonus: In thêm tên của User đang đăng nhập hệ thống bằng cách truy xuất biến môi trường toàn cục (env) của hệ điều hành.
+# Bonus 1: In thêm tên của User đang đăng nhập hệ thống bằng cách truy xuất biến môi trường toàn cục (env) của hệ điều hành.
 puts "Current user: $tcl_platform(user)"
+
+# ==============================================================================
+# 7. BIẾN DÒNG LỆNH CỦA SCRIPT EDA ($argv0, $argc, $argv) & GLOBAL SCOPE (::varName)
+# ==============================================================================
+# Trong EDA tools (DC, PT, Tessent), script Tcl thường chạy từ dòng lệnh:
+# tclsh run_dft.tcl -design top_chip -chains 8
+# - $argv0: Tên file script ("run_dft.tcl")
+# - $argc : Số lượng tham số truyền vào
+# - $argv : Danh sách chứa các tham số
+
+if {[info exists argv0]} {
+    puts "Script name: $argv0 | Arg count: [expr {[info exists argc] ? $argc : 0}]"
+}
+
+# Biến Toàn cục trong Namespace gốc (dùng hai dấu ::)
+set ::GLOBAL_EDA_MODE "AUTOPROMOTE_SCAN"
+puts "Global EDA Mode: $::GLOBAL_EDA_MODE"

@@ -23,8 +23,8 @@ def setup_gemini():
         os.environ["GEMINI_API_KEY"] = api_key
     
     genai.configure(api_key=api_key)
-    # Sử dụng gemini-1.5-flash làm mặc định để phản hồi nhanh
-    return genai.GenerativeModel('gemini-1.5-flash')
+    # Sử dụng gemini-3.5-flash làm mặc định để phản hồi nhanh
+    return genai.GenerativeModel('gemini-3.5-flash')
 
 def generate_problem(model):
     print("\n[Hệ thống] Đang kết nối tới Gemini AI để tạo một đề bài thực tế...")

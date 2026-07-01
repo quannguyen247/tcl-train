@@ -23,8 +23,8 @@ def setup_gemini():
         os.environ["GEMINI_API_KEY"] = api_key
     
     genai.configure(api_key=api_key)
-    # Use gemini-1.5-flash as default for faster responses
-    return genai.GenerativeModel('gemini-1.5-flash')
+    # Use gemini-3.5-flash as default for faster responses
+    return genai.GenerativeModel('gemini-3.5-flash')
 
 def generate_problem(model):
     print("\n[System] Contacting Gemini AI to generate a realistic industry problem...")
