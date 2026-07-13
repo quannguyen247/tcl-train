@@ -1,1 +1,0 @@
-puts [string length {\\\t}]
