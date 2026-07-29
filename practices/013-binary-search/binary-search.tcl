@@ -1,16 +1,19 @@
-proc binarySearch {list target} {
-    set low 0
-    set high [expr {[llength $list] - 1}]
-    while {$low <= $high} {
-        set mid [expr {($low + $high) / 2}]
-        set val [lindex $list $mid]
-        if {$val == $target} {
+proc binarySearch {haystack needle} {
+    set left 0
+    set right [expr {[llength $haystack] - 1}]
+
+    while {$left <= $right} {
+        set mid [expr {($left + $right) / 2}]
+        set midVal [lindex $haystack $mid]
+
+        if {$midVal == $needle} {
             return $mid
-        } elseif {$val < $target} {
-            set low [expr {$mid + 1}]
+        } elseif {$midVal < $needle} {
+            set left [expr {$mid + 1}]
         } else {
-            set high [expr {$mid - 1}]
+            set right [expr {$mid - 1}]
         }
     }
-    error "value not in list"
+
+    return -1
 }
