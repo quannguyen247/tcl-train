@@ -1,46 +1,102 @@
 proc solve {puzzle} {
-    set puzzle [string map {"=" "=="} $puzzle]
-    regexp -all {[A-Z]} $puzzle letters
-    set unique_letters [lsort -unique $letters]
-    if {[llength $unique_letters] > 10} { return {} }
-    
-    regexp -all {\b[A-Z]} $puzzle leading_list
-    set leading [lsort -unique $leading_list]
+    set words [regexp -all -inline {[A-Z]+} $puzzle]
+    set result [lindex $words end]
+    set addends [lrange $words 0 end-1]
 
-    set digits {0 1 2 3 4 5 6 7 8 9}
-    set n [llength $unique_letters]
-    
-    foreach perm [permutations $digits $n] {
-        set map {}
-        set valid 1
-        for {set i 0} {$i < $n} {incr i} {
-            set char [lindex $unique_letters $i]
-            set val [lindex $perm $i]
-            if {$val == 0 && [lsearch -exact $leading $char] != -1} {
-                set valid 0
-                break
-            }
-            lappend map $char $val
-        }
-        if {!$valid} continue
-        set expr_str [string map $map $puzzle]
-        if {[expr $expr_str]} {
-            return $map
-        }
+    if {[llength [lsort -unique [regexp -all -inline {[A-Z]} $puzzle]]] > 10} {
+        return {}
     }
-    return {}
+
+    set leading {}
+    set width 0
+    foreach word $words {
+        if {[string length $word] > 1} {
+            dict set leading [string index $word 0] 1
+        }
+        set width [expr {max($width, [string length $word])}]
+    }
+
+    set columns {}
+    for {set pos 0} {$pos < $width} {incr pos} {
+        set terms {}
+        foreach word $addends {
+            if {$pos < [string length $word]} {
+                dict incr terms [string index $word end-$pos]
+            }
+        }
+        set target [expr {$pos < [string length $result]
+            ? [string index $result end-$pos] : ""}]
+        lappend columns [list $terms $target]
+    }
+
+    return [::alphametics::column $columns 0 0 {} {} $leading]
 }
 
-proc permutations {items k} {
-    if {$k == 0} { return {{}} }
-    if {[llength $items] == 0} { return {} }
-    set result {}
-    for {set i 0} {$i < [llength $items]} {incr i} {
-        set item [lindex $items $i]
-        set rest [lreplace $items $i $i]
-        foreach p [permutations $rest [expr {$k - 1}]] {
-            lappend result [linsert $p 0 $item]
+namespace eval ::alphametics {
+    proc column {columns pos carry mapping used leading} {
+        if {$pos == [llength $columns]} {
+            return [expr {$carry == 0 ? $mapping : {}}]
         }
+
+        lassign [lindex $columns $pos] terms target
+        return [assign $columns $pos $carry $terms [dict keys $terms] 0 \
+            $carry $target $mapping $used $leading]
     }
-    return $result
+
+    proc assign {columns col carry terms letters index sum target mapping used leading} {
+        if {$index == [llength $letters]} {
+            set digit [expr {$sum % 10}]
+            set nextCarry [expr {$sum / 10}]
+
+            if {$target eq ""} {
+                if {$digit != 0} { return {} }
+                return [column $columns [expr {$col + 1}] $nextCarry \
+                    $mapping $used $leading]
+            }
+
+            if {[dict exists $mapping $target]} {
+                if {[dict get $mapping $target] != $digit} { return {} }
+                return [column $columns [expr {$col + 1}] $nextCarry \
+                    $mapping $used $leading]
+            }
+
+            if {[dict exists $used $digit]
+                || ($digit == 0 && [dict exists $leading $target])} {
+                return {}
+            }
+
+            dict set mapping $target $digit
+            dict set used $digit 1
+            return [column $columns [expr {$col + 1}] $nextCarry \
+                $mapping $used $leading]
+        }
+
+        set letter [lindex $letters $index]
+        set count [dict get $terms $letter]
+
+        if {[dict exists $mapping $letter]} {
+            return [assign $columns $col $carry $terms $letters \
+                [expr {$index + 1}] [expr {$sum + $count * [dict get $mapping $letter]}] \
+                $target $mapping $used $leading]
+        }
+
+        for {set digit 0} {$digit <= 9} {incr digit} {
+            if {[dict exists $used $digit]
+                || ($digit == 0 && [dict exists $leading $letter])} {
+                continue
+            }
+
+            set nextMap $mapping
+            set nextUsed $used
+            dict set nextMap $letter $digit
+            dict set nextUsed $digit 1
+
+            set answer [assign $columns $col $carry $terms $letters \
+                [expr {$index + 1}] [expr {$sum + $count * $digit}] \
+                $target $nextMap $nextUsed $leading]
+            if {$answer ne {}} { return $answer }
+        }
+
+        return {}
+    }
 }
