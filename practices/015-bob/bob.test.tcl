@@ -1,20 +1,144 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-16T18:30:19Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "bob.tcl"
+
+
+test bob-1 "asking a question" -body {
+    heyBob "Does this cryogenic chamber make me look fat?"
+} -returnCodes ok -result "Sure."
+
+skip bob-2
+test bob-2 "shouting" -body {
+    heyBob "WATCH OUT!"
+} -returnCodes ok -result "Whoa, chill out!"
+
+skip bob-3
+test bob-3 "forceful question" -body {
+    heyBob "WHAT'S GOING ON?"
+} -returnCodes ok -result "Calm down, I know what I'm doing!"
+
+skip bob-4
+test bob-4 "silence" -body {
+    heyBob ""
+} -returnCodes ok -result "Fine. Be that way!"
+
+skip bob-5
+test bob-5 "stating something" -body {
+    heyBob "Tom-ay-to, tom-aaaah-to."
+} -returnCodes ok -result "Whatever."
+
+skip bob-6
+test bob-6 "asking a numeric question" -body {
+    heyBob "You are, what, like 15?"
+} -returnCodes ok -result "Sure."
+
+skip bob-7
+test bob-7 "asking gibberish" -body {
+    heyBob "fffbbcbeab?"
+} -returnCodes ok -result "Sure."
+
+skip bob-8
+test bob-8 "question with no letters" -body {
+    heyBob "4?"
+} -returnCodes ok -result "Sure."
+
+skip bob-9
+test bob-9 "non-letters with question" -body {
+    heyBob ":) ?"
+} -returnCodes ok -result "Sure."
+
+skip bob-10
+test bob-10 "prattling on" -body {
+    heyBob "Wait! Hang on. Are you going to be OK?"
+} -returnCodes ok -result "Sure."
+
+skip bob-11
+test bob-11 "ending with whitespace" -body {
+    heyBob "Okay if like my  spacebar  quite a bit?   "
+} -returnCodes ok -result "Sure."
+
+skip bob-12
+test bob-12 "multiple line question" -body {
+    heyBob "\nDoes this cryogenic chamber make\n me look fat?"
+} -returnCodes ok -result "Sure."
+
+skip bob-13
+test bob-13 "shouting gibberish" -body {
+    heyBob "FCECDFCAAB"
+} -returnCodes ok -result "Whoa, chill out!"
+
+skip bob-14
+test bob-14 "shouting a statement containing a question mark" -body {
+    heyBob "DO LIONS EAT PEOPLE? AHHHHH."
+} -returnCodes ok -result "Whoa, chill out!"
+
+skip bob-15
+test bob-15 "shouting numbers" -body {
+    heyBob "1, 2, 3 GO!"
+} -returnCodes ok -result "Whoa, chill out!"
+
+skip bob-16
+test bob-16 "shouting with special characters" -body {
+    heyBob "ZOMG THE %^*@#\$(*^ ZOMBIES ARE COMING!!11!!1!"
+} -returnCodes ok -result "Whoa, chill out!"
+
+skip bob-17
+test bob-17 "shouting with no exclamation mark" -body {
+    heyBob "I HATE THE DENTIST"
+} -returnCodes ok -result "Whoa, chill out!"
+
+skip bob-18
+test bob-18 "prolonged silence" -body {
+    heyBob "          "
+} -returnCodes ok -result "Fine. Be that way!"
+
+skip bob-19
+test bob-19 "alternate silence" -body {
+    heyBob "\t\t\t\t\t\t\t\t\t\t"
+} -returnCodes ok -result "Fine. Be that way!"
+
+skip bob-20
+test bob-20 "other whitespace" -body {
+    heyBob "\n\r \t"
+} -returnCodes ok -result "Fine. Be that way!"
+
+skip bob-21
+test bob-21 "talking forcefully" -body {
+    heyBob "Hi there!"
+} -returnCodes ok -result "Whatever."
+
+skip bob-22
+test bob-22 "using acronyms in regular speech" -body {
+    heyBob "It's OK if you don't want to go work for NASA."
+} -returnCodes ok -result "Whatever."
+
+skip bob-23
+test bob-23 "no letters" -body {
+    heyBob "1, 2, 3"
+} -returnCodes ok -result "Whatever."
+
+skip bob-24
+test bob-24 "statement containing question mark" -body {
+    heyBob "Ending with ? means a question."
+} -returnCodes ok -result "Whatever."
+
+skip bob-25
+test bob-25 "starting with whitespace" -body {
+    heyBob "         hmmmmmmm..."
+} -returnCodes ok -result "Whatever."
+
+skip bob-26
+test bob-26 "non-question ending with whitespace" -body {
+    heyBob "This is a statement ending with whitespace      "
+} -returnCodes ok -result "Whatever."
+
+
+cleanupTests

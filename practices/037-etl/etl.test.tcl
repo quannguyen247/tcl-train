@@ -1,9 +1,93 @@
-package require tcltest 2
-namespace import tcltest::*
+#!/usr/bin/env tclsh
+# generated: 2026-07-17T19:53:30Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
+
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
 source "etl.tcl"
 
-test 037-etl-1 "Dummy test to pass" -body {
-    expr {1}
-} -returnCodes 0 -result 1
+
+test etl-1 "single letter" -body {
+    transform {
+        1 {A}
+    }
+} -returnCodes ok -match dictionary -result {
+    a 1
+}
+
+skip etl-2
+test etl-2 "single score with multiple letters" -body {
+    transform {
+        1 {A E I O U}
+    }
+} -returnCodes ok -match dictionary -result {
+    a 1
+    e 1
+    i 1
+    o 1
+    u 1
+}
+
+skip etl-3
+test etl-3 "multiple scores with multiple letters" -body {
+    transform {
+        1 {A E}
+        2 {D G}
+    }
+} -returnCodes ok -match dictionary -result {
+    a 1
+    d 2
+    e 1
+    g 2
+}
+
+skip etl-4
+test etl-4 "multiple scores with differing numbers of letters" -body {
+    transform {
+        1 {A E I O U L N R S T}
+        2 {D G}
+        3 {B C M P}
+        4 {F H V W Y}
+        5 {K}
+        8 {J X}
+        10 {Q Z}
+    }
+} -returnCodes ok -match dictionary -result {
+    a 1
+    b 3
+    c 3
+    d 2
+    e 1
+    f 4
+    g 2
+    h 4
+    i 1
+    j 8
+    k 5
+    l 1
+    m 3
+    n 1
+    o 1
+    p 3
+    q 10
+    r 1
+    s 1
+    t 1
+    u 1
+    v 4
+    w 4
+    x 8
+    y 4
+    z 10
+}
+
+skip etl-5
+test etl-5 "odd number of list elements" -body {
+    transform {1 {a b c} 2}
+} -returnCodes error -result "invalid input"
 
 cleanupTests

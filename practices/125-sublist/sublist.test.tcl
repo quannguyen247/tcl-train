@@ -1,20 +1,104 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T17:55:45Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "sublist.tcl"
+
+
+test sublist-1 "empty lists" -body {
+    sublist {} {}
+} -returnCodes ok -result "equal"
+
+skip sublist-2
+test sublist-2 "empty list within non empty list" -body {
+    sublist {} {1 2 3}
+} -returnCodes ok -result "sublist"
+
+skip sublist-3
+test sublist-3 "non empty list contains empty list" -body {
+    sublist {1 2 3} {}
+} -returnCodes ok -result "superlist"
+
+skip sublist-4
+test sublist-4 "list equals itself" -body {
+    sublist {1 2 3} {1 2 3}
+} -returnCodes ok -result "equal"
+
+skip sublist-5
+test sublist-5 "different lists" -body {
+    sublist {1 2 3} {2 3 4}
+} -returnCodes ok -result "unequal"
+
+skip sublist-6
+test sublist-6 "false start" -body {
+    sublist {1 2 5} {0 1 2 3 1 2 5 6}
+} -returnCodes ok -result "sublist"
+
+skip sublist-7
+test sublist-7 "consecutive" -body {
+    sublist {1 1 2} {0 1 1 1 2 1 2}
+} -returnCodes ok -result "sublist"
+
+skip sublist-8
+test sublist-8 "sublist at start" -body {
+    sublist {0 1 2} {0 1 2 3 4 5}
+} -returnCodes ok -result "sublist"
+
+skip sublist-9
+test sublist-9 "sublist in middle" -body {
+    sublist {2 3 4} {0 1 2 3 4 5}
+} -returnCodes ok -result "sublist"
+
+skip sublist-10
+test sublist-10 "sublist at end" -body {
+    sublist {3 4 5} {0 1 2 3 4 5}
+} -returnCodes ok -result "sublist"
+
+skip sublist-11
+test sublist-11 "at start of superlist" -body {
+    sublist {0 1 2 3 4 5} {0 1 2}
+} -returnCodes ok -result "superlist"
+
+skip sublist-12
+test sublist-12 "in middle of superlist" -body {
+    sublist {0 1 2 3 4 5} {2 3}
+} -returnCodes ok -result "superlist"
+
+skip sublist-13
+test sublist-13 "at end of superlist" -body {
+    sublist {0 1 2 3 4 5} {3 4 5}
+} -returnCodes ok -result "superlist"
+
+skip sublist-14
+test sublist-14 "first list missing element from second list" -body {
+    sublist {1 3} {1 2 3}
+} -returnCodes ok -result "unequal"
+
+skip sublist-15
+test sublist-15 "second list missing element from first list" -body {
+    sublist {1 2 3} {1 3}
+} -returnCodes ok -result "unequal"
+
+skip sublist-16
+test sublist-16 "first list missing additional digits from second list" -body {
+    sublist {1 2} {1 22}
+} -returnCodes ok -result "unequal"
+
+skip sublist-17
+test sublist-17 "order matters to a list" -body {
+    sublist {1 2 3} {3 2 1}
+} -returnCodes ok -result "unequal"
+
+skip sublist-18
+test sublist-18 "same digits but different numbers" -body {
+    sublist {1 0 1} {10 1}
+} -returnCodes ok -result "unequal"
+
+
+cleanupTests

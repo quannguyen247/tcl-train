@@ -1,51 +1,151 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
+source "robot-name.tcl"
+
+#configure -verbose {body error msec}
+
+test robot-1 "can create a robot" -setup {
+    resetRobotNames
+} -body {
+    set robot [Robot new]
+    expr {$robot eq ""}
+} -returnCodes ok -match boolean -result no
+
+skip robot-2
+test robot-2 "robot has a name" -setup {
+    resetRobotNames
+} -body {
+    set robot [Robot new]
+    $robot name
+} -returnCodes ok -match robotName -result true
+
+skip robot-3
+test robot-3 "name sticks" -setup {
+    resetRobotNames
+} -body {
+    set robot [Robot new]
+    set theName [$robot name]
+    expr {$theName eq [$robot name]}
+} -returnCodes ok -match boolean -result true
+
+skip robot-4
+test robot-4 "reset changes name" -setup {
+    resetRobotNames
+} -body {
+    set robot [Robot new]
+    set theName [$robot name]
+    $robot reset
+    expr {$theName eq [$robot name]}
+} -returnCodes ok -match boolean -result false
+
+skip robot-5
+test robot-5 "reset before name called does not cause an error" -setup {
+    resetRobotNames
+} -body {
+    set robot [Robot new]
+    $robot reset
+    $robot name
+} -returnCodes ok -match robotName -result true
+
+skip robot-6
+test robot-6 "reset multiple times" -setup {
+    resetRobotNames
+} -body {
+    set robot [Robot new]
+    set names [dict create]
+    foreach i {1 2 3 4 5} {
+        $robot reset
+        dict set names [$robot name] $i
     }
+    expr {[dict size $names] == 5}
+} -returnCodes ok -match boolean -result true
+
+skip robot-7
+test robot-7 "different robots have different names" -setup {
+    resetRobotNames
+} -body {
+    set r1 [Robot new]
+    set r2 [Robot new]
+    expr {[$r1 name] eq [$r2 name]}
+} -returnCodes ok -match boolean -result false
+
+skip robot-8
+test robot-8 "different name when chosen name is taken" -setup {
+    resetRobotNames
+} -body {
+    # this test assumes you're using ::tcl::mathfunc::rand
+    # as the source of randomness
+    set seed 1234
+    expr {srand($seed)}
+    set r1 [Robot new]
+    expr {srand($seed)}
+    set r2 [Robot new]
+    expr {[$r1 name] eq [$r2 name]}
+} -returnCodes ok -match boolean -result false
+
+skip robot-9
+test robot-9 "generate lots of robots" -setup {
+    resetRobotNames
+} -body {
+    set iterations 10000
+    set seenNames {}
+    for {set i 0} {$i < $iterations} {incr i} {
+        set robot [Robot new]
+        dict incr seenNames [$robot name]
+        # Tcl does not garbage collect
+        $robot destroy
+    }
+    expr {[dict size $seenNames] == $iterations}
+} -returnCodes ok -match boolean -result true
+
+# These tests are optional. For some implementations, they can be too time-consuming.
+# Change `runBonus` to `true` to run them.
+set runBonus false
+
+if {$runBonus} {
+    skip robot-10
+    test robot-10 "generate all robots" -setup {
+        resetRobotNames
+    } -body {
+        set start [clock milliseconds]
+        set limit [expr {$start + 60 * 1000}] ;# abort after 60 seconds
+        set size [expr {26 * 26 * 1000}]
+        set seenNames {}
+        for {set i 0} {$i < $size} {incr i} {
+            set robot [Robot new]
+            if {[clock milliseconds] > $limit} {
+                error "time out"
+            }
+            dict incr seenNames [$robot name]
+            $robot destroy
+        }
+        expr {[dict size $seenNames] == $size}
+    } -returnCodes ok -match boolean -result true
+
+    skip robot-11
+    test robot-11 "generate too many robots" -setup {
+        resetRobotNames
+    } -body {
+        set start [clock milliseconds]
+        set limit [expr {$start + 60 * 1000}] ;# abort after 60 seconds
+        set size [expr {26 * 26 * 1000}]
+        for {set i 0} {$i < $size} {incr i} {
+            set robot [Robot new]
+            if {[clock milliseconds] > $limit} {
+                error "time out"
+            }
+            $robot destroy
+        }
+        # the 676,001st robot
+        Robot new
+    } -returnCodes error -result "no more names available"
 }
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
-
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
-
-
-# Since Tcl boolean values can be more than just 0/1...
-#   set a yes; set b true
-#   expr  {$a == $b}     ;# => 0
-#   expr  {$a && $b}     ;# => 1
-#   expr  {!!$a == !!$b} ;# => 1
-#   set a off; set b no
-#   expr {$a == $b}      ;# => 0
-#   expr {$a && $b}      ;# => 0
-#   expr {!!$a == !!$b}  ;# => 1
-#
-proc booleanMatch {expected actual} {
-    return [expr {
-        [string is boolean -strict $expected] &&
-        [string is boolean -strict $actual] &&
-        !!$expected == !!$actual
-    }]
-}
-customMatch boolean booleanMatch
-
-# Valid Robot name is 2 letters and 3 numbers
-proc robotNameMatch {expected actual} {
-    set re {^[A-Z]{2}[0-9]{3}$}
-    booleanMatch $expected [regexp $re $actual]
-}
-customMatch robotName robotNameMatch
+cleanupTests

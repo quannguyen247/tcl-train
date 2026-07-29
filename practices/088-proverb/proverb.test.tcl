@@ -1,49 +1,66 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T19:22:59Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
+source "proverb.tcl"
+
+
+test proverb-1 "zero pieces" -body {
+    recite {}
+} -returnCodes ok -match orderedLists -result {}
+
+skip proverb-2
+test proverb-2 "one piece" -body {
+    recite {nail}
+} -returnCodes ok -match orderedLists -result {
+    "And all for the want of a nail."
 }
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
+skip proverb-3
+test proverb-3 "two pieces" -body {
+    recite {nail shoe}
+} -returnCodes ok -match orderedLists -result {
+    "For want of a nail the shoe was lost."
+    "And all for the want of a nail."
 }
 
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
-
-
-# Compare two ordered lists without comparing the lists themselves 
-# as strings.
-# e.g.
-#     set first {
-#         a  b  c
-#     }
-#     set second [list a b c]
-#     expr {$first eq $second}           ;# 0
-#     expr {$first == $second}           ;# 0
-#     orderedListsMatch $first $second   ;# true
-#
-proc orderedListsMatch {expected actual} {
-    if {[llength $expected] != [llength $actual]} {
-        return false
-    }
-    foreach e $expected a $actual {
-        if {$e != $a} {
-            return false
-        }
-    }
-    return true
+skip proverb-4
+test proverb-4 "three pieces" -body {
+    recite {nail shoe horse}
+} -returnCodes ok -match orderedLists -result {
+    "For want of a nail the shoe was lost."
+    "For want of a shoe the horse was lost."
+    "And all for the want of a nail."
 }
-customMatch orderedLists orderedListsMatch
+
+skip proverb-5
+test proverb-5 "full proverb" -body {
+    recite {nail shoe horse rider message battle kingdom}
+} -returnCodes ok -match orderedLists -result {
+    "For want of a nail the shoe was lost."
+    "For want of a shoe the horse was lost."
+    "For want of a horse the rider was lost."
+    "For want of a rider the message was lost."
+    "For want of a message the battle was lost."
+    "For want of a battle the kingdom was lost."
+    "And all for the want of a nail."
+}
+
+skip proverb-6
+test proverb-6 "four pieces modernized" -body {
+    recite {pin gun soldier battle}
+} -returnCodes ok -match orderedLists -result {
+    "For want of a pin the gun was lost."
+    "For want of a gun the soldier was lost."
+    "For want of a soldier the battle was lost."
+    "And all for the want of a pin."
+}
+
+
+cleanupTests

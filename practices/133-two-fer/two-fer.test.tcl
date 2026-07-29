@@ -1,20 +1,29 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T18:31:47Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "two-fer.tcl"
+
+
+test two-fer-1 "no name given" -body {
+    two-fer
+} -returnCodes ok -result "One for you, one for me."
+
+skip two-fer-2
+test two-fer-2 "a name given" -body {
+    two-fer "Alice"
+} -returnCodes ok -result "One for Alice, one for me."
+
+skip two-fer-3
+test two-fer-3 "another name given" -body {
+    two-fer "Bob"
+} -returnCodes ok -result "One for Bob, one for me."
+
+
+cleanupTests

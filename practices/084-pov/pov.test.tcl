@@ -1,86 +1,109 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-23T00:52:06Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
-
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
-
-# Copy the needed procs into your test file.  Use it like this:
-#
-#    customMatch dictionary dictionaryMatch
-#    test name "description" -body {
-#        code that returns a dictionary
-#    } -match dictionary -result {expected dictionary value here}
+############################################################
+source "pov.tcl"
 
 
-# Compare two dictionaries for the same keys and same values
-proc dictionaryMatch {expected actual} {
-    if {[dict size $expected] != [dict size $actual]} {
-        return false
-    }
-    dict for {key value} $expected {
-        if {![dict exists $actual $key]} {
-            return false
-        }
-        set actualValue [dict get $actual $key]
+# "trees" are shown as dict literals here
+# each node in a tree has:
+#    "label" - a string
+#    "children" - (optional) a list of child nodes)
 
-        # if this value is a dict then recurse, 
-        # else just check for string equality
-        if {[string is list -strict $value] &&
-            [llength $value] > 1 && 
-            [llength $value] % 2 == 0
-        } {
-            set procname [lindex [info level 0] 0]
-            if {![$procname $value $actualValue]} {
-                return false
-            }
-        } elseif {$actualValue ne $value} {
-            return false
-        }
-    }
-    return true
-}
-customMatch dictionary dictionaryMatch
+test pov-1 "Reroot a tree so that its root is the specified node.: Results in the same tree if the input tree is a singleton" -body {
+    set input {label x}
+    fromPov $input x
+} -returnCodes ok -match dictionary -result {label x}
+
+skip pov-2
+test pov-2 "Reroot a tree so that its root is the specified node.: Can reroot a tree with a parent and one sibling" -body {
+    set input {label parent children {{label x} {label sibling}}}
+    fromPov $input x
+} -returnCodes ok -match dictionary -result {label x children {{label parent children {{label sibling}}}}}
+
+skip pov-3
+test pov-3 "Reroot a tree so that its root is the specified node.: Can reroot a tree with a parent and many siblings" -body {
+    set input {label parent children {{label a} {label x} {label b} {label c}}}
+    fromPov $input x
+} -returnCodes ok -match dictionary -result {label x children {{label parent children {{label a} {label b} {label c}}}}}
+
+skip pov-4
+test pov-4 "Reroot a tree so that its root is the specified node.: Can reroot a tree with new root deeply nested in tree" -body {
+    set input {label level-0 children {{label level-1 children {{label level-2 children {{label level-3 children {{label x}}}}}}}}}
+    fromPov $input x
+} -returnCodes ok -match dictionary -result {label x children {{label level-3 children {{label level-2 children {{label level-1 children {{label level-0}}}}}}}}}
+
+skip pov-5
+test pov-5 "Reroot a tree so that its root is the specified node.: Moves children of the new root to same level as former parent" -body {
+    set input {label parent children {{label x children {{label kid-0} {label kid-1}}}}}
+    fromPov $input x
+} -returnCodes ok -match dictionary -result {label x children {{label kid-0} {label kid-1} {label parent}}}
+
+skip pov-6
+test pov-6 "Reroot a tree so that its root is the specified node.: Can reroot a complex tree with cousins" -body {
+    set input {label grandparent children {{label parent children {{label x children {{label kid-0} {label kid-1}}} {label sibling-0} {label sibling-1}}} {label uncle children {{label cousin-0} {label cousin-1}}}}}
+    fromPov $input x
+} -returnCodes ok -match dictionary -result {label x children {{label kid-0} {label kid-1} {label parent children {{label sibling-0} {label sibling-1} {label grandparent children {{label uncle children {{label cousin-0} {label cousin-1}}}}}}}}}
+
+skip pov-7
+test pov-7 "Reroot a tree so that its root is the specified node.: Errors if target does not exist in a singleton tree" -body {
+    set input {label x}
+    fromPov $input nonexistent
+} -returnCodes error -result "no such target"
+
+skip pov-8
+test pov-8 "Reroot a tree so that its root is the specified node.: Errors if target does not exist in a large tree" -body {
+    set input {label parent children {{label x children {{label kid-0} {label kid-1}}} {label sibling-0} {label sibling-1}}}
+    fromPov $input nonexistent
+} -returnCodes error -result "no such target"
+
+skip pov-9
+test pov-9 "Given two nodes, find the path between them: Can find path to parent" -body {
+    set input {label parent children {{label x} {label sibling}}}
+    path $input x parent
+} -returnCodes ok -match orderedLists -result {x parent}
+
+skip pov-10
+test pov-10 "Given two nodes, find the path between them: Can find path to sibling" -body {
+    set input {label parent children {{label a} {label x} {label b} {label c}}}
+    path $input x b
+} -returnCodes ok -match orderedLists -result {x parent b}
+
+skip pov-11
+test pov-11 "Given two nodes, find the path between them: Can find path to cousin" -body {
+    set input {label grandparent children {{label parent children {{label x children {{label kid-0} {label kid-1}}} {label sibling-0} {label sibling-1}}} {label uncle children {{label cousin-0} {label cousin-1}}}}}
+    path $input x cousin-1
+} -returnCodes ok -match orderedLists -result {x parent grandparent uncle cousin-1}
+
+skip pov-12
+test pov-12 "Given two nodes, find the path between them: Can find path not involving root" -body {
+    set input {label grandparent children {{label parent children {{label x} {label sibling-0} {label sibling-1}}}}}
+    path $input x sibling-1
+} -returnCodes ok -match orderedLists -result {x parent sibling-1}
+
+skip pov-13
+test pov-13 "Given two nodes, find the path between them: Can find path from nodes other than x" -body {
+    set input {label parent children {{label a} {label x} {label b} {label c}}}
+    path $input a c
+} -returnCodes ok -match orderedLists -result {a parent c}
+
+skip pov-14
+test pov-14 "Given two nodes, find the path between them: Errors if destination does not exist" -body {
+    set input {label parent children {{label x children {{label kid-0} {label kid-1}}} {label sibling-0} {label sibling-1}}}
+    path $input x nonexistent
+} -returnCodes error -result "no such label"
+
+skip pov-15
+test pov-15 "Given two nodes, find the path between them: Errors if source does not exist" -body {
+    set input {label parent children {{label x children {{label kid-0} {label kid-1}}} {label sibling-0} {label sibling-1}}}
+    path $input nonexistent x
+} -returnCodes error -result "no such label"
 
 
-# Compare two ordered lists without comparing the lists themselves 
-# as strings.
-# e.g.
-#     set first {
-#         a  b  c
-#     }
-#     set second [list a b c]
-#     expr {$first eq $second}           ;# 0
-#     expr {$first == $second}           ;# 0
-#     orderedListsMatch $first $second   ;# true
-#
-proc orderedListsMatch {expected actual} {
-    if {[llength $expected] != [llength $actual]} {
-        return false
-    }
-    foreach e $expected a $actual {
-        if {$e != $a} {
-            return false
-        }
-    }
-    return true
-}
-customMatch orderedLists orderedListsMatch
+cleanupTests

@@ -1,44 +1,114 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-18T18:34:49Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
-
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
+############################################################
+source "matching-brackets.tcl"
 
 
-# Since Tcl boolean values can be more than just 0/1...
-#   set a yes; set b true
-#   expr  {$a == $b}     ;# => 0
-#   expr  {$a && $b}     ;# => 1
-#   expr  {!!$a == !!$b} ;# => 1
-#   set a off; set b no
-#   expr {$a == $b}      ;# => 0
-#   expr {$a && $b}      ;# => 0
-#   expr {!!$a == !!$b}  ;# => 1
-#
-proc booleanMatch {expected actual} {
-    return [expr {
-        [string is boolean -strict $expected] &&
-        [string is boolean -strict $actual] &&
-        !!$expected == !!$actual
-    }]
-}
-customMatch boolean booleanMatch
+test matching-brackets-1 "paired square brackets" -body {
+    bracketsMatch "\[]"
+} -returnCodes ok -match boolean -result true
+
+skip matching-brackets-2
+test matching-brackets-2 "empty string" -body {
+    bracketsMatch ""
+} -returnCodes ok -match boolean -result true
+
+skip matching-brackets-3
+test matching-brackets-3 "unpaired brackets" -body {
+    bracketsMatch "\[\["
+} -returnCodes ok -match boolean -result false
+
+skip matching-brackets-4
+test matching-brackets-4 "wrong ordered brackets" -body {
+    bracketsMatch "\}\{"
+} -returnCodes ok -match boolean -result false
+
+skip matching-brackets-5
+test matching-brackets-5 "wrong closing bracket" -body {
+    bracketsMatch "\{]"
+} -returnCodes ok -match boolean -result false
+
+skip matching-brackets-6
+test matching-brackets-6 "paired with whitespace" -body {
+    bracketsMatch "\{ \}"
+} -returnCodes ok -match boolean -result true
+
+skip matching-brackets-7
+test matching-brackets-7 "partially paired brackets" -body {
+    bracketsMatch "\{\[])"
+} -returnCodes ok -match boolean -result false
+
+skip matching-brackets-8
+test matching-brackets-8 "simple nested brackets" -body {
+    bracketsMatch "\{\[]\}"
+} -returnCodes ok -match boolean -result true
+
+skip matching-brackets-9
+test matching-brackets-9 "several paired brackets" -body {
+    bracketsMatch "\{\}\[]"
+} -returnCodes ok -match boolean -result true
+
+skip matching-brackets-10
+test matching-brackets-10 "paired and nested brackets" -body {
+    bracketsMatch "(\[\{\}(\{\}\[])])"
+} -returnCodes ok -match boolean -result true
+
+skip matching-brackets-11
+test matching-brackets-11 "unopened closing brackets" -body {
+    bracketsMatch "\{\[)]\[]\}"
+} -returnCodes ok -match boolean -result false
+
+skip matching-brackets-12
+test matching-brackets-12 "unpaired and nested brackets" -body {
+    bracketsMatch "(\[\{])"
+} -returnCodes ok -match boolean -result false
+
+skip matching-brackets-13
+test matching-brackets-13 "paired and wrong nested brackets" -body {
+    bracketsMatch "\[(\{]\})"
+} -returnCodes ok -match boolean -result false
+
+skip matching-brackets-14
+test matching-brackets-14 "paired and wrong nested brackets but innermost are correct" -body {
+    bracketsMatch "\[(\{\}])"
+} -returnCodes ok -match boolean -result false
+
+skip matching-brackets-15
+test matching-brackets-15 "paired and incomplete brackets" -body {
+    bracketsMatch "\{\}\["
+} -returnCodes ok -match boolean -result false
+
+skip matching-brackets-16
+test matching-brackets-16 "too many closing brackets" -body {
+    bracketsMatch "\[]]"
+} -returnCodes ok -match boolean -result false
+
+skip matching-brackets-17
+test matching-brackets-17 "early unexpected brackets" -body {
+    bracketsMatch ")()"
+} -returnCodes ok -match boolean -result false
+
+skip matching-brackets-18
+test matching-brackets-18 "early mismatched brackets" -body {
+    bracketsMatch "\{)()"
+} -returnCodes ok -match boolean -result false
+
+skip matching-brackets-19
+test matching-brackets-19 "math expression" -body {
+    bracketsMatch "(((185 + 223.85) * 15) - 543)/2"
+} -returnCodes ok -match boolean -result true
+
+skip matching-brackets-20
+test matching-brackets-20 "complex latex expression" -body {
+    bracketsMatch "\\left(\\begin\{array\}\{cc\} \\frac\{1\}\{3\} & x\\\\ \\mathrm\{e\}^\{x\} &... x^2 \\end\{array\}\\right)"
+} -returnCodes ok -match boolean -result true
+
+
+cleanupTests

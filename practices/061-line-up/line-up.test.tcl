@@ -1,20 +1,109 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-18T02:07:48Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "line-up.tcl"
+
+
+test line-up-1 "format smallest non-exceptional ordinal numeral 4" -body {
+    formatTicket "Gianna" 4
+} -returnCodes ok -result "Gianna, you are the 4th customer we serve today. Thank you!"
+
+skip line-up-2
+test line-up-2 "format greatest single digit non-exceptional ordinal numeral 9" -body {
+    formatTicket "Maarten" 9
+} -returnCodes ok -result "Maarten, you are the 9th customer we serve today. Thank you!"
+
+skip line-up-3
+test line-up-3 "format non-exceptional ordinal numeral 5" -body {
+    formatTicket "Petronila" 5
+} -returnCodes ok -result "Petronila, you are the 5th customer we serve today. Thank you!"
+
+skip line-up-4
+test line-up-4 "format non-exceptional ordinal numeral 6" -body {
+    formatTicket "Attakullakulla" 6
+} -returnCodes ok -result "Attakullakulla, you are the 6th customer we serve today. Thank you!"
+
+skip line-up-5
+test line-up-5 "format non-exceptional ordinal numeral 7" -body {
+    formatTicket "Kate" 7
+} -returnCodes ok -result "Kate, you are the 7th customer we serve today. Thank you!"
+
+skip line-up-6
+test line-up-6 "format non-exceptional ordinal numeral 8" -body {
+    formatTicket "Maximiliano" 8
+} -returnCodes ok -result "Maximiliano, you are the 8th customer we serve today. Thank you!"
+
+skip line-up-7
+test line-up-7 "format exceptional ordinal numeral 1" -body {
+    formatTicket "Mary" 1
+} -returnCodes ok -result "Mary, you are the 1st customer we serve today. Thank you!"
+
+skip line-up-8
+test line-up-8 "format exceptional ordinal numeral 2" -body {
+    formatTicket "Haruto" 2
+} -returnCodes ok -result "Haruto, you are the 2nd customer we serve today. Thank you!"
+
+skip line-up-9
+test line-up-9 "format exceptional ordinal numeral 3" -body {
+    formatTicket "Henriette" 3
+} -returnCodes ok -result "Henriette, you are the 3rd customer we serve today. Thank you!"
+
+skip line-up-10
+test line-up-10 "format smallest two digit non-exceptional ordinal numeral 10" -body {
+    formatTicket "Alvarez" 10
+} -returnCodes ok -result "Alvarez, you are the 10th customer we serve today. Thank you!"
+
+skip line-up-11
+test line-up-11 "format non-exceptional ordinal numeral 11" -body {
+    formatTicket "Jacqueline" 11
+} -returnCodes ok -result "Jacqueline, you are the 11th customer we serve today. Thank you!"
+
+skip line-up-12
+test line-up-12 "format non-exceptional ordinal numeral 12" -body {
+    formatTicket "Juan" 12
+} -returnCodes ok -result "Juan, you are the 12th customer we serve today. Thank you!"
+
+skip line-up-13
+test line-up-13 "format non-exceptional ordinal numeral 13" -body {
+    formatTicket "Patricia" 13
+} -returnCodes ok -result "Patricia, you are the 13th customer we serve today. Thank you!"
+
+skip line-up-14
+test line-up-14 "format exceptional ordinal numeral 21" -body {
+    formatTicket "Washi" 21
+} -returnCodes ok -result "Washi, you are the 21st customer we serve today. Thank you!"
+
+skip line-up-15
+test line-up-15 "format exceptional ordinal numeral 62" -body {
+    formatTicket "Nayra" 62
+} -returnCodes ok -result "Nayra, you are the 62nd customer we serve today. Thank you!"
+
+skip line-up-16
+test line-up-16 "format exceptional ordinal numeral 100" -body {
+    formatTicket "John" 100
+} -returnCodes ok -result "John, you are the 100th customer we serve today. Thank you!"
+
+skip line-up-17
+test line-up-17 "format exceptional ordinal numeral 101" -body {
+    formatTicket "Zeinab" 101
+} -returnCodes ok -result "Zeinab, you are the 101st customer we serve today. Thank you!"
+
+skip line-up-18
+test line-up-18 "format non-exceptional ordinal numeral 112" -body {
+    formatTicket "Knud" 112
+} -returnCodes ok -result "Knud, you are the 112th customer we serve today. Thank you!"
+
+skip line-up-19
+test line-up-19 "format exceptional ordinal numeral 123" -body {
+    formatTicket "Yma" 123
+} -returnCodes ok -result "Yma, you are the 123rd customer we serve today. Thank you!"
+
+
+cleanupTests

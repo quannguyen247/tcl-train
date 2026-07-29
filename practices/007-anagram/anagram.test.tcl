@@ -1,20 +1,104 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-16T21:49:58Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "anagram.tcl"
+
+
+test anagram-1 "no matches" -body {
+    findAnagrams diaper {hello world zombies pants}
+} -returnCodes ok -result {}
+
+skip anagram-2
+test anagram-2 "detects two anagrams" -body {
+    findAnagrams solemn {lemons cherry melons}
+} -returnCodes ok -result {lemons melons}
+
+skip anagram-3
+test anagram-3 "does not detect anagram subsets" -body {
+    findAnagrams good {dog goody}
+} -returnCodes ok -result {}
+
+skip anagram-4
+test anagram-4 "detects anagram" -body {
+    findAnagrams listen {enlists google inlets banana}
+} -returnCodes ok -result {inlets}
+
+skip anagram-5
+test anagram-5 "detects three anagrams" -body {
+    findAnagrams allergy {gallery ballerina regally clergy largely leading}
+} -returnCodes ok -result {gallery regally largely}
+
+skip anagram-6
+test anagram-6 "detects multiple anagrams with different case" -body {
+    findAnagrams nose {Eons ONES}
+} -returnCodes ok -result {Eons ONES}
+
+skip anagram-7
+test anagram-7 "does not detect non-anagrams with identical checksum" -body {
+    findAnagrams mass {last}
+} -returnCodes ok -result {}
+
+skip anagram-8
+test anagram-8 "detects anagrams case-insensitively" -body {
+    findAnagrams Orchestra {cashregister Carthorse radishes}
+} -returnCodes ok -result {Carthorse}
+
+skip anagram-9
+test anagram-9 "detects anagrams using case-insensitive subject" -body {
+    findAnagrams Orchestra {cashregister carthorse radishes}
+} -returnCodes ok -result {carthorse}
+
+skip anagram-10
+test anagram-10 "detects anagrams using case-insensitive possible matches" -body {
+    findAnagrams orchestra {cashregister Carthorse radishes}
+} -returnCodes ok -result {Carthorse}
+
+skip anagram-11
+test anagram-11 "does not detect an anagram if the original word is repeated" -body {
+    findAnagrams go {goGoGO}
+} -returnCodes ok -result {}
+
+skip anagram-12
+test anagram-12 "anagrams must use all letters exactly once" -body {
+    findAnagrams tapper {patter}
+} -returnCodes ok -result {}
+
+skip anagram-13
+test anagram-13 "words are not anagrams of themselves" -body {
+    findAnagrams BANANA {BANANA}
+} -returnCodes ok -result {}
+
+skip anagram-14
+test anagram-14 "words are not anagrams of themselves even if letter case is partially different" -body {
+    findAnagrams BANANA {Banana}
+} -returnCodes ok -result {}
+
+skip anagram-15
+test anagram-15 "words are not anagrams of themselves even if letter case is completely different" -body {
+    findAnagrams BANANA {banana}
+} -returnCodes ok -result {}
+
+skip anagram-16
+test anagram-16 "words other than themselves can be anagrams" -body {
+    findAnagrams LISTEN {LISTEN Silent}
+} -returnCodes ok -result {Silent}
+
+skip anagram-17
+test anagram-17 "handles case of greek letters" -body {
+    findAnagrams ΑΒΓ {ΒΓΑ ΒΓΔ γβα αβγ}
+} -returnCodes ok -result {ΒΓΑ γβα}
+
+skip anagram-18
+test anagram-18 "different characters may have the same bytes" -body {
+    findAnagrams a⬂ {€a}
+} -returnCodes ok -result {}
+
+
+cleanupTests

@@ -1,20 +1,94 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T17:58:05Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "sum-of-multiples.tcl"
+
+
+test sum-of-multiples-1 "no multiples within limit" -body {
+    sumOfMultiples {3 5} 1
+} -returnCodes ok -result 0
+
+skip sum-of-multiples-2
+test sum-of-multiples-2 "one factor has multiples within limit" -body {
+    sumOfMultiples {3 5} 4
+} -returnCodes ok -result 3
+
+skip sum-of-multiples-3
+test sum-of-multiples-3 "more than one multiple within limit" -body {
+    sumOfMultiples {3} 7
+} -returnCodes ok -result 9
+
+skip sum-of-multiples-4
+test sum-of-multiples-4 "more than one factor with multiples within limit" -body {
+    sumOfMultiples {3 5} 10
+} -returnCodes ok -result 23
+
+skip sum-of-multiples-5
+test sum-of-multiples-5 "each multiple is only counted once" -body {
+    sumOfMultiples {3 5} 100
+} -returnCodes ok -result 2318
+
+skip sum-of-multiples-6
+test sum-of-multiples-6 "a much larger limit" -body {
+    sumOfMultiples {3 5} 1000
+} -returnCodes ok -result 233168
+
+skip sum-of-multiples-7
+test sum-of-multiples-7 "three factors" -body {
+    sumOfMultiples {7 13 17} 20
+} -returnCodes ok -result 51
+
+skip sum-of-multiples-8
+test sum-of-multiples-8 "factors not relatively prime" -body {
+    sumOfMultiples {4 6} 15
+} -returnCodes ok -result 30
+
+skip sum-of-multiples-9
+test sum-of-multiples-9 "some pairs of factors relatively prime and some not" -body {
+    sumOfMultiples {5 6 8} 150
+} -returnCodes ok -result 4419
+
+skip sum-of-multiples-10
+test sum-of-multiples-10 "one factor is a multiple of another" -body {
+    sumOfMultiples {5 25} 51
+} -returnCodes ok -result 275
+
+skip sum-of-multiples-11
+test sum-of-multiples-11 "much larger factors" -body {
+    sumOfMultiples {43 47} 10000
+} -returnCodes ok -result 2203160
+
+skip sum-of-multiples-12
+test sum-of-multiples-12 "all numbers are multiples of 1" -body {
+    sumOfMultiples {1} 100
+} -returnCodes ok -result 4950
+
+skip sum-of-multiples-13
+test sum-of-multiples-13 "no factors means an empty sum" -body {
+    sumOfMultiples {} 10000
+} -returnCodes ok -result 0
+
+skip sum-of-multiples-14
+test sum-of-multiples-14 "the only multiple of 0 is 0" -body {
+    sumOfMultiples {0} 1
+} -returnCodes ok -result 0
+
+skip sum-of-multiples-15
+test sum-of-multiples-15 "the factor 0 does not affect the sum of multiples of other factors" -body {
+    sumOfMultiples {3 0} 4
+} -returnCodes ok -result 3
+
+skip sum-of-multiples-16
+test sum-of-multiples-16 "solutions using include-exclude must extend to cardinality greater than 3" -body {
+    sumOfMultiples {2 3 5 7 11} 10000
+} -returnCodes ok -result 39614537
+
+
+cleanupTests

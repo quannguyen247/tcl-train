@@ -1,20 +1,218 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-23T13:19:05Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
+source "relative-distance.tcl"
+
+
+test relative-distance-1 "Direct parent-child relation" -body {
+    degreeOfSeparation Vera Tomoko {
+        Vera {Tomoko}
+        Tomoko {Aditi}
     }
-}
+} -returnCodes ok -result 1
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+skip relative-distance-2
+test relative-distance-2 "Sibling relationship" -body {
+    degreeOfSeparation Olga Yassin {
+        Dalia {Olga Yassin}
+    }
+} -returnCodes ok -result 1
+
+skip relative-distance-3
+test relative-distance-3 "Two degrees of separation, grandchild" -body {
+    degreeOfSeparation Khadija Rami {
+        Khadija {Mateo}
+        Mateo {Rami}
+    }
+} -returnCodes ok -result 2
+
+skip relative-distance-4
+test relative-distance-4 "Unrelated individuals" -body {
+    degreeOfSeparation Priya Kaito {
+        Priya {Rami}
+        Kaito {Elif}
+    }
+} -returnCodes ok -result -1
+
+skip relative-distance-5
+test relative-distance-5 "Complex graph, cousins" -body {
+    degreeOfSeparation Dimitri Fabio {
+        Aiko {Bao Carlos}
+        Bao {Dalia Elias}
+        Carlos {Fatima Gustavo}
+        Dalia {Hassan Isla}
+        Elias {Javier}
+        Fatima {Khadija Liam}
+        Gustavo {Mina}
+        Hassan {Noah Olga}
+        Isla {Pedro}
+        Javier {Quynh Ravi}
+        Khadija {Sofia}
+        Liam {Tariq Uma}
+        Mina {Viktor Wang}
+        Noah {Xiomara}
+        Olga {Yuki}
+        Pedro {Zane Aditi}
+        Quynh {Boris}
+        Ravi {Celine}
+        Sofia {Diego Elif}
+        Tariq {Farah}
+        Uma {Giorgio}
+        Viktor {Hana Ian}
+        Wang {Jing}
+        Xiomara {Kaito}
+        Yuki {Leila}
+        Zane {Mateo}
+        Aditi {Nia}
+        Boris {Oscar}
+        Celine {Priya}
+        Diego {Qi}
+        Elif {Rami}
+        Farah {Sven}
+        Giorgio {Tomoko}
+        Hana {Umar}
+        Ian {Vera}
+        Jing {Wyatt}
+        Kaito {Xia}
+        Leila {Yassin}
+        Mateo {Zara}
+        Nia {Antonio}
+        Oscar {Bianca}
+        Priya {Cai}
+        Qi {Dimitri}
+        Rami {Ewa}
+        Sven {Fabio}
+        Tomoko {Gabriela}
+        Umar {Helena}
+        Vera {Igor}
+        Wyatt {Jun}
+        Xia {Kim}
+        Yassin {Lucia}
+        Zara {Mohammed}
+    }
+} -returnCodes ok -result 9
+
+skip relative-distance-6
+test relative-distance-6 "Complex graph, no shortcut, far removed nephew" -body {
+    degreeOfSeparation Lucia Jun {
+        Aiko {Bao Carlos}
+        Bao {Dalia Elias}
+        Carlos {Fatima Gustavo}
+        Dalia {Hassan Isla}
+        Elias {Javier}
+        Fatima {Khadija Liam}
+        Gustavo {Mina}
+        Hassan {Noah Olga}
+        Isla {Pedro}
+        Javier {Quynh Ravi}
+        Khadija {Sofia}
+        Liam {Tariq Uma}
+        Mina {Viktor Wang}
+        Noah {Xiomara}
+        Olga {Yuki}
+        Pedro {Zane Aditi}
+        Quynh {Boris}
+        Ravi {Celine}
+        Sofia {Diego Elif}
+        Tariq {Farah}
+        Uma {Giorgio}
+        Viktor {Hana Ian}
+        Wang {Jing}
+        Xiomara {Kaito}
+        Yuki {Leila}
+        Zane {Mateo}
+        Aditi {Nia}
+        Boris {Oscar}
+        Celine {Priya}
+        Diego {Qi}
+        Elif {Rami}
+        Farah {Sven}
+        Giorgio {Tomoko}
+        Hana {Umar}
+        Ian {Vera}
+        Jing {Wyatt}
+        Kaito {Xia}
+        Leila {Yassin}
+        Mateo {Zara}
+        Nia {Antonio}
+        Oscar {Bianca}
+        Priya {Cai}
+        Qi {Dimitri}
+        Rami {Ewa}
+        Sven {Fabio}
+        Tomoko {Gabriela}
+        Umar {Helena}
+        Vera {Igor}
+        Wyatt {Jun}
+        Xia {Kim}
+        Yassin {Lucia}
+        Zara {Mohammed}
+    }
+} -returnCodes ok -result 14
+
+skip relative-distance-7
+test relative-distance-7 "Complex graph, some shortcuts, cross-down and cross-up, cousins several times removed, with unrelated family tree" -body {
+    degreeOfSeparation Wyatt Xia {
+        Aiko {Bao Carlos}
+        Bao {Dalia}
+        Carlos {Fatima Gustavo}
+        Dalia {Hassan Isla}
+        Fatima {Khadija Liam}
+        Gustavo {Mina}
+        Hassan {Noah Olga}
+        Isla {Pedro}
+        Javier {Quynh Ravi}
+        Khadija {Sofia}
+        Liam {Tariq Uma}
+        Mina {Viktor Wang}
+        Noah {Xiomara}
+        Olga {Yuki}
+        Pedro {Zane Aditi}
+        Quynh {Boris}
+        Ravi {Celine}
+        Sofia {Diego Elif}
+        Tariq {Farah}
+        Uma {Giorgio}
+        Viktor {Hana Ian}
+        Wang {Jing}
+        Xiomara {Kaito}
+        Yuki {Leila}
+        Zane {Mateo}
+        Aditi {Nia}
+        Boris {Oscar}
+        Celine {Priya}
+        Diego {Qi}
+        Elif {Rami}
+        Farah {Sven}
+        Giorgio {Tomoko}
+        Hana {Umar}
+        Ian {Vera}
+        Jing {Wyatt}
+        Kaito {Xia}
+        Leila {Yassin}
+        Mateo {Zara}
+        Nia {Antonio}
+        Oscar {Bianca}
+        Priya {Cai}
+        Qi {Dimitri}
+        Rami {Ewa}
+        Sven {Fabio}
+        Tomoko {Gabriela}
+        Umar {Helena}
+        Vera {Igor}
+        Wyatt {Jun}
+        Xia {Kim}
+        Yassin {Lucia}
+        Zara {Mohammed}
+    }
+} -returnCodes ok -result 12
+
+
+cleanupTests

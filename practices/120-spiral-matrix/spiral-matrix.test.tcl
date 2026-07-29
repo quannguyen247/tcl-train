@@ -1,42 +1,64 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T04:00:53Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
+source "spiral-matrix.tcl"
+
+
+test spiral-matrix-1 "empty spiral" -body {
+    spiralMatrix 0
+} -returnCodes ok -match listOfLists -result {}
+
+skip spiral-matrix-2
+test spiral-matrix-2 "trivial spiral" -body {
+    spiralMatrix 1
+} -returnCodes ok -match listOfLists -result {
+    {1}
 }
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
+skip spiral-matrix-3
+test spiral-matrix-3 "spiral of size 2" -body {
+    spiralMatrix 2
+} -returnCodes ok -match listOfLists -result {
+    {1 2}
+    {4 3}
 }
 
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
-
-
-# Compare two ordered lists without comparing the lists themselves 
-# as strings. Calls itself recursively.
-
-proc listOfListsMatch {expected actual} {
-    set procname [lindex [info level 0] 0]
-    if {[llength $expected] != [llength $actual]} {
-        return false
-    }
-    foreach e $expected a $actual {
-        if {[llength $e] > 1 ? (![$procname $e $a]) : ($e != $a)} {
-            return false
-        }
-    }
-    return true
+skip spiral-matrix-4
+test spiral-matrix-4 "spiral of size 3" -body {
+    spiralMatrix 3
+} -returnCodes ok -match listOfLists -result {
+    {1 2 3}
+    {8 9 4}
+    {7 6 5}
 }
-customMatch listOfLists listOfListsMatch
+
+skip spiral-matrix-5
+test spiral-matrix-5 "spiral of size 4" -body {
+    spiralMatrix 4
+} -returnCodes ok -match listOfLists -result {
+    {1 2 3 4}
+    {12 13 14 5}
+    {11 16 15 6}
+    {10 9 8 7}
+}
+
+skip spiral-matrix-6
+test spiral-matrix-6 "spiral of size 5" -body {
+    spiralMatrix 5
+} -returnCodes ok -match listOfLists -result {
+    {1 2 3 4 5}
+    {16 17 18 19 6}
+    {15 24 25 20 7}
+    {14 23 22 21 8}
+    {13 12 11 10 9}
+}
+
+
+cleanupTests

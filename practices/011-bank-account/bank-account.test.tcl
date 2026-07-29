@@ -1,20 +1,190 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-26T14:06:00Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
+source "bank-account.tcl"
+
+
+test bank-account-1 "Newly opened account has zero balance" -body {
+    set account [BankAccount new]
+    $account open
+    $account balance
+} -returnCodes ok -result 0
+
+skip bank-account-2
+test bank-account-2 "Single deposit" -body {
+    set account [BankAccount new]
+    $account open
+    $account deposit 100
+    $account balance
+} -returnCodes ok -result 100
+
+skip bank-account-3
+test bank-account-3 "Multiple deposits" -body {
+    set account [BankAccount new]
+    $account open
+    $account deposit 100
+    $account deposit 50
+    $account balance
+} -returnCodes ok -result 150
+
+skip bank-account-4
+test bank-account-4 "Withdraw once" -body {
+    set account [BankAccount new]
+    $account open
+    $account deposit 100
+    $account withdraw 75
+    $account balance
+} -returnCodes ok -result 25
+
+skip bank-account-5
+test bank-account-5 "Withdraw twice" -body {
+    set account [BankAccount new]
+    $account open
+    $account deposit 100
+    $account withdraw 80
+    $account withdraw 20
+    $account balance
+} -returnCodes ok -result 0
+
+skip bank-account-6
+test bank-account-6 "Can do multiple operations sequentially" -body {
+    set account [BankAccount new]
+    $account open
+    $account deposit 100
+    $account deposit 110
+    $account withdraw 200
+    $account deposit 60
+    $account withdraw 50
+    $account balance
+} -returnCodes ok -result 20
+
+skip bank-account-7
+test bank-account-7 "Cannot check balance of closed account" -body {
+    set account [BankAccount new]
+    $account open
+    $account close
+    $account balance
+} -returnCodes error -result "account not open"
+
+skip bank-account-8
+test bank-account-8 "Cannot deposit into closed account" -body {
+    set account [BankAccount new]
+    $account open
+    $account close
+    $account deposit 50
+} -returnCodes error -result "account not open"
+
+skip bank-account-9
+test bank-account-9 "Cannot deposit into unopened account" -body {
+    set account [BankAccount new]
+    $account deposit 50
+} -returnCodes error -result "account not open"
+
+skip bank-account-10
+test bank-account-10 "Cannot withdraw from closed account" -body {
+    set account [BankAccount new]
+    $account open
+    $account close
+    $account withdraw 50
+} -returnCodes error -result "account not open"
+
+skip bank-account-11
+test bank-account-11 "Cannot close an account that was not opened" -body {
+    set account [BankAccount new]
+    $account close
+} -returnCodes error -result "account not open"
+
+skip bank-account-12
+test bank-account-12 "Cannot open an already opened account" -body {
+    set account [BankAccount new]
+    $account open
+    $account open
+} -returnCodes error -result "account already open"
+
+skip bank-account-13
+test bank-account-13 "Reopened account does not retain balance" -body {
+    set account [BankAccount new]
+    $account open
+    $account deposit 50
+    $account close
+    $account open
+    $account balance
+} -returnCodes ok -result 0
+
+skip bank-account-14
+test bank-account-14 "Cannot withdraw more than deposited" -body {
+    set account [BankAccount new]
+    $account open
+    $account deposit 25
+    $account withdraw 50
+} -returnCodes error -result "amount must be less than balance"
+
+skip bank-account-15
+test bank-account-15 "Cannot withdraw negative" -body {
+    set account [BankAccount new]
+    $account open
+    $account deposit 100
+    $account withdraw -50
+} -returnCodes error -result "amount must be greater than 0"
+
+skip bank-account-16
+test bank-account-16 "Cannot deposit negative" -body {
+    set account [BankAccount new]
+    $account open
+    $account deposit -50
+} -returnCodes error -result "amount must be greater than 0"
+
+skip bank-account-17
+test bank-account-17 "Can handle concurrent transactions" -body {
+    # In this style of using Tcl threads, we don't need
+    # to make any thread-specific adjustments to the
+    # BankAccount class: passing messages between threads
+    # does all the locking for us transparently.
+
+    package require Thread
+
+    BankAccount create theAccount
+    theAccount open
+    theAccount deposit 123
+
+    # Create 1000 worker threads
+    for {set i 0} {$i < 1000} {incr i} {
+        lappend threads [thread::create -joinable {
+            proc doWork {acctThread} {
+                thread::send -async $acctThread {
+                    theAccount deposit 5
+                }
+                # wait a few milliseconds
+                after [expr {int(10 * rand())}]
+                thread::send -async $acctThread {
+                    theAccount withdraw 5
+                }
+                # now that I've done the work, release me
+                thread::release
+            }
+            thread::wait
+        }]
     }
-}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+    # Launch them
+    foreach thread $threads {
+        thread::send -async $thread [list doWork [thread::id]]
+    }
+
+    # Reap them
+    foreach thread $threads {
+        thread::join $thread
+    }
+
+    theAccount balance
+
+} -returnCodes ok -result 123
+
+cleanupTests

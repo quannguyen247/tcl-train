@@ -1,44 +1,119 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T18:12:38Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
-
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
+############################################################
+source "triangle.tcl"
 
 
-# Since Tcl boolean values can be more than just 0/1...
-#   set a yes; set b true
-#   expr  {$a == $b}     ;# => 0
-#   expr  {$a && $b}     ;# => 1
-#   expr  {!!$a == !!$b} ;# => 1
-#   set a off; set b no
-#   expr {$a == $b}      ;# => 0
-#   expr {$a && $b}      ;# => 0
-#   expr {!!$a == !!$b}  ;# => 1
-#
-proc booleanMatch {expected actual} {
-    return [expr {
-        [string is boolean -strict $expected] &&
-        [string is boolean -strict $actual] &&
-        !!$expected == !!$actual
-    }]
-}
-customMatch boolean booleanMatch
+test triangle-1 "equilateral triangle: all sides are equal" -body {
+    triangle::is equilateral {2 2 2}
+} -returnCodes ok -match boolean -result true
+
+skip triangle-2
+test triangle-2 "equilateral triangle: any side is unequal" -body {
+    triangle::is equilateral {2 3 2}
+} -returnCodes ok -match boolean -result false
+
+skip triangle-3
+test triangle-3 "equilateral triangle: no sides are equal" -body {
+    triangle::is equilateral {5 4 6}
+} -returnCodes ok -match boolean -result false
+
+skip triangle-4
+test triangle-4 "equilateral triangle: all zero sides is not a triangle" -body {
+    triangle::is equilateral {0 0 0}
+} -returnCodes ok -match boolean -result false
+
+skip triangle-5
+test triangle-5 "equilateral triangle: sides may be floats" -body {
+    triangle::is equilateral {0.5 0.5 0.5}
+} -returnCodes ok -match boolean -result true
+
+skip triangle-6
+test triangle-6 "isosceles triangle: last two sides are equal" -body {
+    triangle::is isosceles {3 4 4}
+} -returnCodes ok -match boolean -result true
+
+skip triangle-7
+test triangle-7 "isosceles triangle: first two sides are equal" -body {
+    triangle::is isosceles {4 4 3}
+} -returnCodes ok -match boolean -result true
+
+skip triangle-8
+test triangle-8 "isosceles triangle: first and last sides are equal" -body {
+    triangle::is isosceles {4 3 4}
+} -returnCodes ok -match boolean -result true
+
+skip triangle-9
+test triangle-9 "isosceles triangle: equilateral triangles are also isosceles" -body {
+    triangle::is isosceles {4 4 4}
+} -returnCodes ok -match boolean -result true
+
+skip triangle-10
+test triangle-10 "isosceles triangle: no sides are equal" -body {
+    triangle::is isosceles {2 3 4}
+} -returnCodes ok -match boolean -result false
+
+skip triangle-11
+test triangle-11 "isosceles triangle: first triangle inequality violation" -body {
+    triangle::is isosceles {1 1 3}
+} -returnCodes ok -match boolean -result false
+
+skip triangle-12
+test triangle-12 "isosceles triangle: second triangle inequality violation" -body {
+    triangle::is isosceles {1 3 1}
+} -returnCodes ok -match boolean -result false
+
+skip triangle-13
+test triangle-13 "isosceles triangle: third triangle inequality violation" -body {
+    triangle::is isosceles {3 1 1}
+} -returnCodes ok -match boolean -result false
+
+skip triangle-14
+test triangle-14 "isosceles triangle: sides may be floats" -body {
+    triangle::is isosceles {0.5 0.4 0.5}
+} -returnCodes ok -match boolean -result true
+
+skip triangle-15
+test triangle-15 "scalene triangle: no sides are equal" -body {
+    triangle::is scalene {5 4 6}
+} -returnCodes ok -match boolean -result true
+
+skip triangle-16
+test triangle-16 "scalene triangle: all sides are equal" -body {
+    triangle::is scalene {4 4 4}
+} -returnCodes ok -match boolean -result false
+
+skip triangle-17
+test triangle-17 "scalene triangle: first and second sides are equal" -body {
+    triangle::is scalene {4 4 3}
+} -returnCodes ok -match boolean -result false
+
+skip triangle-18
+test triangle-18 "scalene triangle: first and third sides are equal" -body {
+    triangle::is scalene {3 4 3}
+} -returnCodes ok -match boolean -result false
+
+skip triangle-19
+test triangle-19 "scalene triangle: second and third sides are equal" -body {
+    triangle::is scalene {4 3 3}
+} -returnCodes ok -match boolean -result false
+
+skip triangle-20
+test triangle-20 "scalene triangle: may not violate triangle inequality" -body {
+    triangle::is scalene {7 3 2}
+} -returnCodes ok -match boolean -result false
+
+skip triangle-21
+test triangle-21 "scalene triangle: sides may be floats" -body {
+    triangle::is scalene {0.5 0.4 0.6}
+} -returnCodes ok -match boolean -result true
+
+
+cleanupTests

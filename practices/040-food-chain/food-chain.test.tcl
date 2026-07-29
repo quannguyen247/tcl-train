@@ -1,9 +1,180 @@
-package require tcltest 2
-namespace import tcltest::*
+#!/usr/bin/env tclsh
+# generated: 2026-07-17T23:09:17Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
+
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
 source "food-chain.tcl"
 
-test 040-food-chain-1 "Dummy test to pass" -body {
-    expr {1}
-} -returnCodes 0 -result 1
+
+test food-chain-1 "fly" -body {
+    recite 1 1
+} -returnCodes ok -result [join {
+    "I know an old lady who swallowed a fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+} \n]
+
+skip food-chain-2
+test food-chain-2 "spider" -body {
+    recite 2 2
+} -returnCodes ok -result [join {
+    "I know an old lady who swallowed a spider."
+    "It wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+} \n]
+
+skip food-chain-3
+test food-chain-3 "bird" -body {
+    recite 3 3
+} -returnCodes ok -result [join {
+    "I know an old lady who swallowed a bird."
+    "How absurd to swallow a bird!"
+    "She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+} \n]
+
+skip food-chain-4
+test food-chain-4 "cat" -body {
+    recite 4 4
+} -returnCodes ok -result [join {
+    "I know an old lady who swallowed a cat."
+    "Imagine that, to swallow a cat!"
+    "She swallowed the cat to catch the bird."
+    "She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+} \n]
+
+skip food-chain-5
+test food-chain-5 "dog" -body {
+    recite 5 5
+} -returnCodes ok -result [join {
+    "I know an old lady who swallowed a dog."
+    "What a hog, to swallow a dog!"
+    "She swallowed the dog to catch the cat."
+    "She swallowed the cat to catch the bird."
+    "She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+} \n]
+
+skip food-chain-6
+test food-chain-6 "goat" -body {
+    recite 6 6
+} -returnCodes ok -result [join {
+    "I know an old lady who swallowed a goat."
+    "Just opened her throat and swallowed a goat!"
+    "She swallowed the goat to catch the dog."
+    "She swallowed the dog to catch the cat."
+    "She swallowed the cat to catch the bird."
+    "She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+} \n]
+
+skip food-chain-7
+test food-chain-7 "cow" -body {
+    recite 7 7
+} -returnCodes ok -result [join {
+    "I know an old lady who swallowed a cow."
+    "I don't know how she swallowed a cow!"
+    "She swallowed the cow to catch the goat."
+    "She swallowed the goat to catch the dog."
+    "She swallowed the dog to catch the cat."
+    "She swallowed the cat to catch the bird."
+    "She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+} \n]
+
+skip food-chain-8
+test food-chain-8 "horse" -body {
+    recite 8 8
+} -returnCodes ok -result [join {
+    "I know an old lady who swallowed a horse."
+    "She's dead, of course!"
+} \n]
+
+skip food-chain-9
+test food-chain-9 "multiple verses" -body {
+    recite 1 3
+} -returnCodes ok -result [join {
+    "I know an old lady who swallowed a fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+    ""
+    "I know an old lady who swallowed a spider."
+    "It wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+    ""
+    "I know an old lady who swallowed a bird."
+    "How absurd to swallow a bird!"
+    "She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+} \n]
+
+skip food-chain-10
+test food-chain-10 "full song" -body {
+    recite 1 8
+} -returnCodes ok -result [join {
+    "I know an old lady who swallowed a fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+    ""
+    "I know an old lady who swallowed a spider."
+    "It wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+    ""
+    "I know an old lady who swallowed a bird."
+    "How absurd to swallow a bird!"
+    "She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+    ""
+    "I know an old lady who swallowed a cat."
+    "Imagine that, to swallow a cat!"
+    "She swallowed the cat to catch the bird."
+    "She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+    ""
+    "I know an old lady who swallowed a dog."
+    "What a hog, to swallow a dog!"
+    "She swallowed the dog to catch the cat."
+    "She swallowed the cat to catch the bird."
+    "She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+    ""
+    "I know an old lady who swallowed a goat."
+    "Just opened her throat and swallowed a goat!"
+    "She swallowed the goat to catch the dog."
+    "She swallowed the dog to catch the cat."
+    "She swallowed the cat to catch the bird."
+    "She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+    ""
+    "I know an old lady who swallowed a cow."
+    "I don't know how she swallowed a cow!"
+    "She swallowed the cow to catch the goat."
+    "She swallowed the goat to catch the dog."
+    "She swallowed the dog to catch the cat."
+    "She swallowed the cat to catch the bird."
+    "She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her."
+    "She swallowed the spider to catch the fly."
+    "I don't know why she swallowed the fly. Perhaps she'll die."
+    ""
+    "I know an old lady who swallowed a horse."
+    "She's dead, of course!"
+} \n]
+
 
 cleanupTests

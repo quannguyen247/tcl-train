@@ -1,20 +1,69 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T01:26:40Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "scrabble-score.tcl"
+
+
+test scrabble-score-1 "lowercase letter" -body {
+    scrabbleScore "a"
+} -returnCodes ok -result 1
+
+skip scrabble-score-2
+test scrabble-score-2 "uppercase letter" -body {
+    scrabbleScore "A"
+} -returnCodes ok -result 1
+
+skip scrabble-score-3
+test scrabble-score-3 "valuable letter" -body {
+    scrabbleScore "f"
+} -returnCodes ok -result 4
+
+skip scrabble-score-4
+test scrabble-score-4 "short word" -body {
+    scrabbleScore "at"
+} -returnCodes ok -result 2
+
+skip scrabble-score-5
+test scrabble-score-5 "short, valuable word" -body {
+    scrabbleScore "zoo"
+} -returnCodes ok -result 12
+
+skip scrabble-score-6
+test scrabble-score-6 "medium word" -body {
+    scrabbleScore "street"
+} -returnCodes ok -result 6
+
+skip scrabble-score-7
+test scrabble-score-7 "medium, valuable word" -body {
+    scrabbleScore "quirky"
+} -returnCodes ok -result 22
+
+skip scrabble-score-8
+test scrabble-score-8 "long, mixed-case word" -body {
+    scrabbleScore "OxyphenButazone"
+} -returnCodes ok -result 41
+
+skip scrabble-score-9
+test scrabble-score-9 "english-like word" -body {
+    scrabbleScore "pinata"
+} -returnCodes ok -result 8
+
+skip scrabble-score-10
+test scrabble-score-10 "empty input" -body {
+    scrabbleScore ""
+} -returnCodes ok -result 0
+
+skip scrabble-score-11
+test scrabble-score-11 "entire alphabet available" -body {
+    scrabbleScore "abcdefghijklmnopqrstuvwxyz"
+} -returnCodes ok -result 87
+
+
+cleanupTests

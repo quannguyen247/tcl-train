@@ -1,9 +1,34 @@
-package require tcltest 2
-namespace import tcltest::*
+#!/usr/bin/env tclsh
+# generated: 2026-07-17T19:33:15Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
+
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
 source "eliuds-eggs.tcl"
 
-test 035-eliuds-eggs-1 "Dummy test to pass" -body {
-    expr {1}
-} -returnCodes 0 -result 1
+
+test eliuds-eggs-1 "0 eggs" -body {
+    eggCount 0
+} -returnCodes ok -result 0
+
+skip eliuds-eggs-2
+test eliuds-eggs-2 "1 egg" -body {
+    eggCount 16
+} -returnCodes ok -result 1
+
+skip eliuds-eggs-3
+test eliuds-eggs-3 "4 eggs" -body {
+    eggCount 89
+} -returnCodes ok -result 4
+
+skip eliuds-eggs-4
+test eliuds-eggs-4 "13 eggs" -body {
+    eggCount 2000000000
+} -returnCodes ok -result 13
+
 
 cleanupTests

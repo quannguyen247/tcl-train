@@ -1,20 +1,275 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-17T15:45:31Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
+source "state-of-tic-tac-toe.tcl"
+
+
+test state-of-tic-tac-toe-1 "Finished game where X won via left column victory" -body {
+    gamestate {
+        "XOO"
+        "X  "
+        "X  "
     }
-}
+} -returnCodes ok -result "win"
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+skip state-of-tic-tac-toe-2
+test state-of-tic-tac-toe-2 "Finished game where X won via middle column victory" -body {
+    gamestate {
+        "OXO"
+        " X "
+        " X "
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-3
+test state-of-tic-tac-toe-3 "Finished game where X won via right column victory" -body {
+    gamestate {
+        "OOX"
+        "  X"
+        "  X"
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-4
+test state-of-tic-tac-toe-4 "Finished game where O won via left column victory" -body {
+    gamestate {
+        "OXX"
+        "OX "
+        "O  "
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-5
+test state-of-tic-tac-toe-5 "Finished game where O won via middle column victory" -body {
+    gamestate {
+        "XOX"
+        " OX"
+        " O "
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-6
+test state-of-tic-tac-toe-6 "Finished game where O won via right column victory" -body {
+    gamestate {
+        "XXO"
+        " XO"
+        "  O"
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-7
+test state-of-tic-tac-toe-7 "Finished game where X won via top row victory" -body {
+    gamestate {
+        "XXX"
+        "XOO"
+        "O  "
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-8
+test state-of-tic-tac-toe-8 "Finished game where X won via middle row victory" -body {
+    gamestate {
+        "O  "
+        "XXX"
+        " O "
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-9
+test state-of-tic-tac-toe-9 "Finished game where X won via bottom row victory" -body {
+    gamestate {
+        " OO"
+        "O X"
+        "XXX"
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-10
+test state-of-tic-tac-toe-10 "Finished game where O won via top row victory" -body {
+    gamestate {
+        "OOO"
+        "XXO"
+        "XX "
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-11
+test state-of-tic-tac-toe-11 "Finished game where O won via middle row victory" -body {
+    gamestate {
+        "XX "
+        "OOO"
+        "X  "
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-12
+test state-of-tic-tac-toe-12 "Finished game where O won via bottom row victory" -body {
+    gamestate {
+        "XOX"
+        " XX"
+        "OOO"
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-13
+test state-of-tic-tac-toe-13 "Finished game where X won via falling diagonal victory" -body {
+    gamestate {
+        "XOO"
+        " X "
+        "  X"
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-14
+test state-of-tic-tac-toe-14 "Finished game where X won via rising diagonal victory" -body {
+    gamestate {
+        "O X"
+        "OX "
+        "X  "
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-15
+test state-of-tic-tac-toe-15 "Finished game where O won via falling diagonal victory" -body {
+    gamestate {
+        "OXX"
+        "OOX"
+        "X O"
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-16
+test state-of-tic-tac-toe-16 "Finished game where O won via rising diagonal victory" -body {
+    gamestate {
+        "  O"
+        " OX"
+        "OXX"
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-17
+test state-of-tic-tac-toe-17 "Finished game where X won via a row and a column victory" -body {
+    gamestate {
+        "XXX"
+        "XOO"
+        "XOO"
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-18
+test state-of-tic-tac-toe-18 "Finished game where X won via two diagonal victories" -body {
+    gamestate {
+        "XOX"
+        "OXO"
+        "XOX"
+    }
+} -returnCodes ok -result "win"
+
+skip state-of-tic-tac-toe-19
+test state-of-tic-tac-toe-19 "Draw" -body {
+    gamestate {
+        "XOX"
+        "XXO"
+        "OXO"
+    }
+} -returnCodes ok -result "draw"
+
+skip state-of-tic-tac-toe-20
+test state-of-tic-tac-toe-20 "Another draw" -body {
+    gamestate {
+        "XXO"
+        "OXX"
+        "XOO"
+    }
+} -returnCodes ok -result "draw"
+
+skip state-of-tic-tac-toe-21
+test state-of-tic-tac-toe-21 "Ongoing game: one move in" -body {
+    gamestate {
+        "   "
+        "X  "
+        "   "
+    }
+} -returnCodes ok -result "ongoing"
+
+skip state-of-tic-tac-toe-22
+test state-of-tic-tac-toe-22 "Ongoing game: two moves in" -body {
+    gamestate {
+        "O  "
+        " X "
+        "   "
+    }
+} -returnCodes ok -result "ongoing"
+
+skip state-of-tic-tac-toe-23
+test state-of-tic-tac-toe-23 "Ongoing game: five moves in" -body {
+    gamestate {
+        "X  "
+        " XO"
+        "OX "
+    }
+} -returnCodes ok -result "ongoing"
+
+skip state-of-tic-tac-toe-24
+test state-of-tic-tac-toe-24 "Invalid board: X went twice" -body {
+    gamestate {
+        "XX "
+        "   "
+        "   "
+    }
+} -returnCodes error -result "Wrong turn order: X went twice"
+
+skip state-of-tic-tac-toe-25
+test state-of-tic-tac-toe-25 "Invalid board: O started" -body {
+    gamestate {
+        "OOX"
+        "   "
+        "   "
+    }
+} -returnCodes error -result "Wrong turn order: O started"
+
+skip state-of-tic-tac-toe-26
+test state-of-tic-tac-toe-26 "Invalid board: X won and O kept playing" -body {
+    gamestate {
+        "XXX"
+        "OOO"
+        "   "
+    }
+} -returnCodes error -result "Impossible board: game should have ended after the game was won"
+
+skip state-of-tic-tac-toe-27
+test state-of-tic-tac-toe-27 "Invalid board: players kept playing after a win" -body {
+    gamestate {
+        "XXX"
+        "OOO"
+        "XOX"
+    }
+} -returnCodes error -result "Impossible board: game should have ended after the game was won"
+
+skip state-of-tic-tac-toe-28
+test state-of-tic-tac-toe-28 "Invalid board: O kept playing after X wins" -body {
+    gamestate {
+        "OO "
+        "XXX"
+        " O "
+    }
+} -returnCodes error -result "Impossible board: game should have ended after the game was won"
+
+skip state-of-tic-tac-toe-29
+test state-of-tic-tac-toe-29 "Invalid board: X kept playing after O wins" -body {
+    gamestate {
+        "XX "
+        "OOO"
+        " XX"
+    }
+} -returnCodes error -result "Impossible board: game should have ended after the game was won"
+
+
+cleanupTests

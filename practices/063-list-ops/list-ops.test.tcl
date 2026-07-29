@@ -1,26 +1,132 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-27T16:43:41Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "list-ops.tcl"
 
-# Compare  numbers: for example 5.0 == 5
-proc numberMatch {expected actual} {
-    return [expr {$expected == $actual}]
-}
-customMatch numbers numberMatch
+
+test list-ops-1 "append entries to a list and return the new list: empty lists" -body {
+    set list1 {}
+    listOps::append list1 {}
+    set list1
+} -returnCodes ok -result {}
+
+skip list-ops-2
+test list-ops-2 "append entries to a list and return the new list: list to empty list" -body {
+    set list1 {}
+    listOps::append list1 {1 2 3 4}
+    set list1
+} -returnCodes ok -result {1 2 3 4}
+
+skip list-ops-3
+test list-ops-3 "append entries to a list and return the new list: empty list to list" -body {
+    set list1 {1 2 3 4}
+    listOps::append list1 {}
+    set list1
+} -returnCodes ok -result {1 2 3 4}
+
+skip list-ops-4
+test list-ops-4 "append entries to a list and return the new list: non-empty lists" -body {
+    set list1 {1 2}
+    listOps::append list1 {2 3 4 5}
+    set list1
+} -returnCodes ok -result {1 2 2 3 4 5}
+
+skip list-ops-5
+test list-ops-5 "concatenate a list of lists: empty list" -body {
+    listOps::concat {}
+} -returnCodes ok -result {}
+
+skip list-ops-6
+test list-ops-6 "concatenate a list of lists: list of lists" -body {
+    listOps::concat {{1 2} 3 {} {4 5 6}}
+} -returnCodes ok -result {1 2 3 4 5 6}
+
+skip list-ops-7
+test list-ops-7 "concatenate a list of lists: list of nested lists" -body {
+    listOps::concat {{1 2} 3 {{}} {{4 5 6}}}
+} -returnCodes ok -result {1 2 3 {} {4 5 6}}
+
+skip list-ops-8
+test list-ops-8 "filter list returning only values that satisfy the filter function: empty list" -body {
+    listOps::filter {} {x {expr {$x % 2 == 1}}}
+} -returnCodes ok -result {}
+
+skip list-ops-9
+test list-ops-9 "filter list returning only values that satisfy the filter function: non-empty list" -body {
+    listOps::filter {1 2 3 5} {x {expr {$x % 2 == 1}}}
+} -returnCodes ok -result {1 3 5}
+
+skip list-ops-10
+test list-ops-10 "returns the length of a list: empty list" -body {
+    listOps::length {}
+} -returnCodes ok -match numbers -result 0
+
+skip list-ops-11
+test list-ops-11 "returns the length of a list: non-empty list" -body {
+    listOps::length {1 2 3 4}
+} -returnCodes ok -match numbers -result 4
+
+skip list-ops-12
+test list-ops-12 "return a list of elements whose values equal the list value transformed by the mapping function: empty list" -body {
+    listOps::map {} {x {expr {$x + 1}}}
+} -returnCodes ok -result {}
+
+skip list-ops-13
+test list-ops-13 "return a list of elements whose values equal the list value transformed by the mapping function: non-empty list" -body {
+    listOps::map {1 3 5 7} {x {expr {$x + 1}}}
+} -returnCodes ok -result {2 4 6 8}
+
+skip list-ops-14
+test list-ops-14 "folds (reduces) the given list from the left with a function: empty list" -body {
+    listOps::foldl {} 2 {{acc elem} {expr {$acc * $elem}}}
+} -returnCodes ok -match numbers -result 2
+
+skip list-ops-15
+test list-ops-15 "folds (reduces) the given list from the left with a function: direction independent function applied to non-empty list" -body {
+    listOps::foldl {1 2 3 4} 5 {{acc elem} {expr {$acc + $elem}}}
+} -returnCodes ok -match numbers -result 15
+
+skip list-ops-16
+test list-ops-16 "folds (reduces) the given list from the left with a function: direction dependent function applied to non-empty list" -body {
+    listOps::foldl {1 2 3 4} 24 {{acc elem} {expr {1.0 * $elem / $acc}}}
+} -returnCodes ok -match numbers -result 64
+
+skip list-ops-17
+test list-ops-17 "folds (reduces) the given list from the right with a function: empty list" -body {
+    listOps::foldr {} 2 {{acc elem} {expr {$acc * $elem}}}
+} -returnCodes ok -match numbers -result 2
+
+skip list-ops-18
+test list-ops-18 "folds (reduces) the given list from the right with a function: direction independent function applied to non-empty list" -body {
+    listOps::foldr {1 2 3 4} 5 {{acc elem} {expr {$acc + $elem}}}
+} -returnCodes ok -match numbers -result 15
+
+skip list-ops-19
+test list-ops-19 "folds (reduces) the given list from the right with a function: direction dependent function applied to non-empty list" -body {
+    listOps::foldr {1 2 3 4} 24 {{acc elem} {expr {1.0 * $elem / $acc}}}
+} -returnCodes ok -match numbers -result 9
+
+skip list-ops-20
+test list-ops-20 "reverse the elements of the list: empty list" -body {
+    listOps::reverse {}
+} -returnCodes ok -result {}
+
+skip list-ops-21
+test list-ops-21 "reverse the elements of the list: non-empty list" -body {
+    listOps::reverse {1 3 5 7}
+} -returnCodes ok -result {7 5 3 1}
+
+skip list-ops-22
+test list-ops-22 "reverse the elements of the list: list of lists is not flattened" -body {
+    listOps::reverse {{1 2} 3 {} {4 5 6}}
+} -returnCodes ok -result {{4 5 6} {} 3 {1 2}}
+
+
+cleanupTests

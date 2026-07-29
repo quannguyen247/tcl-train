@@ -1,20 +1,239 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-25T16:03:49Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
+source "linked-list.tcl"
+
+
+test linked-list-1 "pop gets element from the list" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 7
+    lappend result [$ll pop]
+} -returnCodes ok -result {7}
+
+skip linked-list-2
+test linked-list-2 "push/pop respectively add/remove at the end of the list" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 11
+    $ll push 13
+    lappend result [$ll pop]
+    lappend result [$ll pop]
+} -returnCodes ok -result {13 11}
+
+skip linked-list-3
+test linked-list-3 "shift gets an element from the list" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 17
+    lappend result [$ll shift]
+} -returnCodes ok -result {17}
+
+skip linked-list-4
+test linked-list-4 "shift gets first element from the list" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 23
+    $ll push 5
+    lappend result [$ll shift]
+    lappend result [$ll shift]
+} -returnCodes ok -result {23 5}
+
+skip linked-list-5
+test linked-list-5 "unshift adds element at start of the list" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll unshift 23
+    $ll unshift 5
+    lappend result [$ll shift]
+    lappend result [$ll shift]
+} -returnCodes ok -result {5 23}
+
+skip linked-list-6
+test linked-list-6 "pop, push, shift, and unshift can be used in any order" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 1
+    $ll push 2
+    lappend result [$ll pop]
+    $ll push 3
+    lappend result [$ll shift]
+    $ll unshift 4
+    $ll push 5
+    lappend result [$ll shift]
+    lappend result [$ll pop]
+    lappend result [$ll shift]
+} -returnCodes ok -result {2 1 4 5 3}
+
+skip linked-list-7
+test linked-list-7 "count an empty list" -body {
+    set result {}
+    set ll [LinkedList new]
+    lappend result [$ll length]
+} -returnCodes ok -result {0}
+
+skip linked-list-8
+test linked-list-8 "count a list with items" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 37
+    $ll push 1
+    lappend result [$ll length]
+} -returnCodes ok -result {2}
+
+skip linked-list-9
+test linked-list-9 "count is correct after mutation" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 31
+    lappend result [$ll length]
+    $ll unshift 43
+    lappend result [$ll length]
+    $ll shift
+    lappend result [$ll length]
+    $ll pop
+    lappend result [$ll length]
+} -returnCodes ok -result {1 2 1 0}
+
+skip linked-list-10
+test linked-list-10 "popping to empty doesn't break the list" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 41
+    $ll push 59
+    $ll pop
+    $ll pop
+    $ll push 47
+    lappend result [$ll length]
+    lappend result [$ll pop]
+} -returnCodes ok -result {1 47}
+
+skip linked-list-11
+test linked-list-11 "shifting to empty doesn't break the list" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 41
+    $ll push 59
+    $ll shift
+    $ll shift
+    $ll push 47
+    lappend result [$ll length]
+    lappend result [$ll shift]
+} -returnCodes ok -result {1 47}
+
+skip linked-list-12
+test linked-list-12 "deletes the only element" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 61
+    $ll delete 61
+    lappend result [$ll length]
+} -returnCodes ok -result {0}
+
+skip linked-list-13
+test linked-list-13 "deletes the element with the specified value from the list" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 71
+    $ll push 83
+    $ll push 79
+    $ll delete 83
+    lappend result [$ll length]
+    lappend result [$ll pop]
+    lappend result [$ll shift]
+} -returnCodes ok -result {2 79 71}
+
+skip linked-list-14
+test linked-list-14 "deletes the element with the specified value from the list, re-assigns tail" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 71
+    $ll push 83
+    $ll push 79
+    $ll delete 83
+    lappend result [$ll length]
+    lappend result [$ll pop]
+    lappend result [$ll pop]
+} -returnCodes ok -result {2 79 71}
+
+skip linked-list-15
+test linked-list-15 "deletes the element with the specified value from the list, re-assigns head" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 71
+    $ll push 83
+    $ll push 79
+    $ll delete 83
+    lappend result [$ll length]
+    lappend result [$ll shift]
+    lappend result [$ll shift]
+} -returnCodes ok -result {2 71 79}
+
+skip linked-list-16
+test linked-list-16 "deletes the first of two elements" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 97
+    $ll push 101
+    $ll delete 97
+    lappend result [$ll length]
+    lappend result [$ll pop]
+} -returnCodes ok -result {1 101}
+
+skip linked-list-17
+test linked-list-17 "deletes the second of two elements" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 97
+    $ll push 101
+    $ll delete 101
+    lappend result [$ll length]
+    lappend result [$ll pop]
+} -returnCodes ok -result {1 97}
+
+skip linked-list-18
+test linked-list-18 "delete does not modify the list if the element is not found" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 89
+    $ll delete 103
+    lappend result [$ll length]
+} -returnCodes ok -result {1}
+
+skip linked-list-19
+test linked-list-19 "deletes only the first occurrence" -body {
+    set result {}
+    set ll [LinkedList new]
+    $ll push 73
+    $ll push 9
+    $ll push 9
+    $ll push 107
+    $ll delete 9
+    lappend result [$ll length]
+    lappend result [$ll pop]
+    lappend result [$ll pop]
+    lappend result [$ll pop]
+} -returnCodes ok -result {3 107 9 73}
+
+# Change this to "true" to enable the bonus test
+if {false} {
+    skip linked-list-bonus
+    test linked-list-bonus "iteration" -body {
+        set result {}
+        set ll [LinkedList new]
+        $ll push 10
+        $ll push 20
+        $ll push 30
+        $ll for value {lappend result [expr {$value / 2}]}
+        set result
+    } -returnCodes ok -result {5 10 15}
 }
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+cleanupTests

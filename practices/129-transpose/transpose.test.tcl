@@ -1,49 +1,223 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T18:10:14Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
+source "transpose.tcl"
+
+
+test transpose-1 "empty string" -body {
+    transpose {}
+} -returnCodes ok -match orderedLists -result {}
+
+skip transpose-2
+test transpose-2 "two characters in a row" -body {
+    transpose {
+        "A1"
     }
+} -returnCodes ok -match orderedLists -result {
+    "A"
+    "1"
 }
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
+skip transpose-3
+test transpose-3 "two characters in a column" -body {
+    transpose {
+        "A"
+        "1"
+    }
+} -returnCodes ok -match orderedLists -result {
+    "A1"
 }
 
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
-
-
-# Compare two ordered lists without comparing the lists themselves 
-# as strings.
-# e.g.
-#     set first {
-#         a  b  c
-#     }
-#     set second [list a b c]
-#     expr {$first eq $second}           ;# 0
-#     expr {$first == $second}           ;# 0
-#     orderedListsMatch $first $second   ;# true
-#
-proc orderedListsMatch {expected actual} {
-    if {[llength $expected] != [llength $actual]} {
-        return false
+skip transpose-4
+test transpose-4 "simple" -body {
+    transpose {
+        "ABC"
+        "123"
     }
-    foreach e $expected a $actual {
-        if {$e != $a} {
-            return false
-        }
-    }
-    return true
+} -returnCodes ok -match orderedLists -result {
+    "A1"
+    "B2"
+    "C3"
 }
-customMatch orderedLists orderedListsMatch
+
+skip transpose-5
+test transpose-5 "single line" -body {
+    transpose {
+        "Single line."
+    }
+} -returnCodes ok -match orderedLists -result {
+    "S"
+    "i"
+    "n"
+    "g"
+    "l"
+    "e"
+    " "
+    "l"
+    "i"
+    "n"
+    "e"
+    "."
+}
+
+skip transpose-6
+test transpose-6 "first line longer than second line" -body {
+    transpose {
+        "The fourth line."
+        "The fifth line."
+    }
+} -returnCodes ok -match orderedLists -result {
+    "TT"
+    "hh"
+    "ee"
+    "  "
+    "ff"
+    "oi"
+    "uf"
+    "rt"
+    "th"
+    "h "
+    " l"
+    "li"
+    "in"
+    "ne"
+    "e."
+    "."
+}
+
+skip transpose-7
+test transpose-7 "second line longer than first line" -body {
+    transpose {
+        "The first line."
+        "The second line."
+    }
+} -returnCodes ok -match orderedLists -result {
+    "TT"
+    "hh"
+    "ee"
+    "  "
+    "fs"
+    "ie"
+    "rc"
+    "so"
+    "tn"
+    " d"
+    "l "
+    "il"
+    "ni"
+    "en"
+    ".e"
+    " ."
+}
+
+skip transpose-8
+test transpose-8 "mixed line length" -body {
+    transpose {
+        "The longest line."
+        "A long line."
+        "A longer line."
+        "A line."
+    }
+} -returnCodes ok -match orderedLists -result {
+    "TAAA"
+    "h   "
+    "elll"
+    " ooi"
+    "lnnn"
+    "ogge"
+    "n e."
+    "glr"
+    "ei "
+    "snl"
+    "tei"
+    " .n"
+    "l e"
+    "i ."
+    "n"
+    "e"
+    "."
+}
+
+skip transpose-9
+test transpose-9 "square" -body {
+    transpose {
+        "HEART"
+        "EMBER"
+        "ABUSE"
+        "RESIN"
+        "TREND"
+    }
+} -returnCodes ok -match orderedLists -result {
+    "HEART"
+    "EMBER"
+    "ABUSE"
+    "RESIN"
+    "TREND"
+}
+
+skip transpose-10
+test transpose-10 "rectangle" -body {
+    transpose {
+        "FRACTURE"
+        "OUTLINED"
+        "BLOOMING"
+        "SEPTETTE"
+    }
+} -returnCodes ok -match orderedLists -result {
+    "FOBS"
+    "RULE"
+    "ATOP"
+    "CLOT"
+    "TIME"
+    "UNIT"
+    "RENT"
+    "EDGE"
+}
+
+skip transpose-11
+test transpose-11 "triangle" -body {
+    transpose {
+        "T"
+        "EE"
+        "AAA"
+        "SSSS"
+        "EEEEE"
+        "RRRRRR"
+    }
+} -returnCodes ok -match orderedLists -result {
+    "TEASER"
+    " EASER"
+    "  ASER"
+    "   SER"
+    "    ER"
+    "     R"
+}
+
+skip transpose-12
+test transpose-12 "jagged triangle" -body {
+    transpose {
+        "11"
+        "2"
+        "3333"
+        "444"
+        "555555"
+        "66666"
+    }
+} -returnCodes ok -match orderedLists -result {
+    "123456"
+    "1 3456"
+    "  3456"
+    "  3 56"
+    "    56"
+    "    5"
+}
+
+
+cleanupTests

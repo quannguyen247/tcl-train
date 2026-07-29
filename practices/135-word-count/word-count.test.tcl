@@ -1,61 +1,152 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T18:44:39Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
+source "word-count.tcl"
+
+
+test word-count-1 "count one word" -body {
+    countWords "word"
+} -returnCodes ok -match dictionary -result {
+    "word" 1
 }
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
+skip word-count-2
+test word-count-2 "count one of each word" -body {
+    countWords "one of each"
+} -returnCodes ok -match dictionary -result {
+    "one" 1
+    "of" 1
+    "each" 1
 }
 
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
-
-# Copy the needed procs into your test file.  Use it like this:
-#
-#    customMatch dictionary dictionaryMatch
-#    test name "description" -body {
-#        code that returns a dictionary
-#    } -match dictionary -result {expected dictionary value here}
-
-
-# Compare two dictionaries for the same keys and same values
-proc dictionaryMatch {expected actual} {
-    if {[dict size $expected] != [dict size $actual]} {
-        return false
-    }
-    dict for {key value} $expected {
-        if {![dict exists $actual $key]} {
-            return false
-        }
-        set actualValue [dict get $actual $key]
-
-        # if this value is a dict then recurse, 
-        # else just check for string equality
-        if {[string is list -strict $value] &&
-            [llength $value] > 1 && 
-            [llength $value] % 2 == 0
-        } {
-            set procname [lindex [info level 0] 0]
-            if {![$procname $value $actualValue]} {
-                return false
-            }
-        } elseif {$actualValue ne $value} {
-            return false
-        }
-    }
-    return true
+skip word-count-3
+test word-count-3 "multiple occurrences of a word" -body {
+    countWords "one fish two fish red fish blue fish"
+} -returnCodes ok -match dictionary -result {
+    "one" 1
+    "fish" 4
+    "two" 1
+    "red" 1
+    "blue" 1
 }
-customMatch dictionary dictionaryMatch
+
+skip word-count-4
+test word-count-4 "handles cramped lists" -body {
+    countWords "one,two,three"
+} -returnCodes ok -match dictionary -result {
+    "one" 1
+    "two" 1
+    "three" 1
+}
+
+skip word-count-5
+test word-count-5 "handles expanded lists" -body {
+    countWords "one,\ntwo,\nthree"
+} -returnCodes ok -match dictionary -result {
+    "one" 1
+    "two" 1
+    "three" 1
+}
+
+skip word-count-6
+test word-count-6 "ignore punctuation" -body {
+    countWords "car: carpet as java: javascript!!&@\$%^&"
+} -returnCodes ok -match dictionary -result {
+    "car" 1
+    "carpet" 1
+    "as" 1
+    "java" 1
+    "javascript" 1
+}
+
+skip word-count-7
+test word-count-7 "include numbers" -body {
+    countWords "testing, 1, 2 testing"
+} -returnCodes ok -match dictionary -result {
+    "testing" 2
+    "1" 1
+    "2" 1
+}
+
+skip word-count-8
+test word-count-8 "normalize case" -body {
+    countWords "go Go GO Stop stop"
+} -returnCodes ok -match dictionary -result {
+    "go" 3
+    "stop" 2
+}
+
+skip word-count-9
+test word-count-9 "with apostrophes" -body {
+    countWords "'First: don't laugh. Then: don't cry. You're getting it.'"
+} -returnCodes ok -match dictionary -result {
+    "first" 1
+    "don't" 2
+    "laugh" 1
+    "then" 1
+    "cry" 1
+    "you're" 1
+    "getting" 1
+    "it" 1
+}
+
+skip word-count-10
+test word-count-10 "with quotations" -body {
+    countWords "Joe can't tell between 'large' and large."
+} -returnCodes ok -match dictionary -result {
+    "joe" 1
+    "can't" 1
+    "tell" 1
+    "between" 1
+    "large" 2
+    "and" 1
+}
+
+skip word-count-11
+test word-count-11 "substrings from the beginning" -body {
+    countWords "Joe can't tell between app, apple and a."
+} -returnCodes ok -match dictionary -result {
+    "joe" 1
+    "can't" 1
+    "tell" 1
+    "between" 1
+    "app" 1
+    "apple" 1
+    "and" 1
+    "a" 1
+}
+
+skip word-count-12
+test word-count-12 "multiple spaces not detected as a word" -body {
+    countWords " multiple   whitespaces"
+} -returnCodes ok -match dictionary -result {
+    "multiple" 1
+    "whitespaces" 1
+}
+
+skip word-count-13
+test word-count-13 "alternating word separators not detected as a word" -body {
+    countWords ",\n,one,\n ,two \n 'three'"
+} -returnCodes ok -match dictionary -result {
+    "one" 1
+    "two" 1
+    "three" 1
+}
+
+skip word-count-14
+test word-count-14 "quotation for word with apostrophe" -body {
+    countWords "can, can't, 'can't'"
+} -returnCodes ok -match dictionary -result {
+    "can" 1
+    "can't" 2
+}
+
+
+cleanupTests

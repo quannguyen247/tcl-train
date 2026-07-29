@@ -1,61 +1,116 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
+# uncomment for more verbose test results
+#configure -verbose {body error usec}
+
+############################################################
+source "satellite.tcl"
+
+# a non-empty result value is a dictionary with keys:
+#   "v"     the root value
+#   "l"     the left tree
+#   "r"     the right tree
+
+test satellite-1.1 "Empty tree" -body {
+    treeFromTraversals {} {}
+} -returnCodes ok -match dictionary -result {}
+
+skip satellite-1.2
+test satellite-1.2 "Tree with one item" -body {
+    treeFromTraversals {a} {a}
+} -returnCodes ok -match dictionary -result {v a l {} r {}}
+
+skip satellite-1.3
+test satellite-1.3 "Tree with many items" -body {
+    treeFromTraversals {a i x f r} {i a f x r}
+} -returnCodes ok -match dictionary -result {
+    v a
+    l {v i l {} r {}}
+    r {v x
+        l {v f l {} r {}}
+        r {v r l {} r {}}
     }
 }
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
 
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
+skip satellite-2.1
+test satellite-2.1 "Reject traversals of different length" -body {
+    treeFromTraversals {a b} {b a r}
+} -returnCodes error -result "traversals must have the same length"
 
-# Copy the needed procs into your test file.  Use it like this:
-#
-#    customMatch dictionary dictionaryMatch
-#    test name "description" -body {
-#        code that returns a dictionary
-#    } -match dictionary -result {expected dictionary value here}
+skip satellite-2.2
+test satellite-2.2 "Reject inconsistemt traversals of same length" -body {
+    treeFromTraversals {x y z} {a b c}
+} -returnCodes error -result "traversals must contain the same elements"
+
+skip satellite-2.3
+test satellite-2.3 "Reject traversals with repeated elements" -body {
+    treeFromTraversals {a b a} {b a a}
+} -returnCodes error -result "traversals must contain unique elements"
 
 
-# Compare two dictionaries for the same keys and same values
-proc dictionaryMatch {expected actual} {
-    if {[dict size $expected] != [dict size $actual]} {
-        return false
-    }
-    dict for {key value} $expected {
-        if {![dict exists $actual $key]} {
-            return false
+skip sattelite-3.1
+test sattelite-3.1 "A degenerate binary tree" -body {
+    treeFromTraversals {a b c d} {d c b a}
+} -returnCodes ok -match dictionary -result {
+    v a
+    l {
+        v b
+        l {
+            v c
+            l { v d l {} r {} }
+            r {}
         }
-        set actualValue [dict get $actual $key]
+        r {}
+    }
+    r {}
+}
 
-        # if this value is a dict then recurse, 
-        # else just check for string equality
-        if {[string is list -strict $value] &&
-            [llength $value] > 1 && 
-            [llength $value] % 2 == 0
-        } {
-            set procname [lindex [info level 0] 0]
-            if {![$procname $value $actualValue]} {
-                return false
-            }
-        } elseif {$actualValue ne $value} {
-            return false
+skip sattelite-3.2
+test sattelite-3.2 "Another degenerate binary tree" -body {
+    treeFromTraversals {a b c d} {a b c d}
+} -returnCodes ok -match dictionary -result {
+    v a
+    l {}
+    r {
+        v b
+        l {}
+        r {
+            v c
+            l {}
+            r { v d l {} r {} }
         }
     }
-    return true
 }
-customMatch dictionary dictionaryMatch
+
+skip sattelite-3.3
+test sattelite-3.3 "Tree with many more items" -body {
+    set preorder {a b d g h c e f i}
+    set inorder  {g d h b a e c i f}
+    treeFromTraversals $preorder $inorder
+} -returnCodes ok -match dictionary -result {
+    v a
+    l {
+        v b
+        l {
+            v d
+            l { v g l {} r {} }
+            r { v h l {} r {} }
+        }
+        r {}
+    }
+    r {
+        v c
+        l { v e l {} r {} }
+        r {
+            v f
+            l { v i l {} r {} }
+            r {}
+        }
+    }
+}
+
+cleanupTests

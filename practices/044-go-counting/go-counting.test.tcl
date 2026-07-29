@@ -1,9 +1,155 @@
-package require tcltest 2
-namespace import tcltest::*
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T19:28:34Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
+
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
 source "go-counting.tcl"
 
-test 044-go-counting-1 "Dummy test to pass" -body {
-    expr {1}
-} -returnCodes 0 -result 1
+
+test go-counting-1 "Black corner territory on 5x5 board" -body {
+    set board [GoBoard new {
+        "  B  "
+        " B B "
+        "B W B"
+        " W W "
+        "  W  "
+    }]
+    $board territory {0 1}
+} -returnCodes ok -match orderedLists -result {black {{0 0} {0 1} {1 0}}}
+
+
+skip go-counting-2
+test go-counting-2 "White center territory on 5x5 board" -body {
+    set board [GoBoard new {
+        "  B  "
+        " B B "
+        "B W B"
+        " W W "
+        "  W  "
+    }]
+    $board territory {2 3}
+} -returnCodes ok -match orderedLists -result {white {{2 3}}}
+
+
+skip go-counting-3
+test go-counting-3 "Open corner territory on 5x5 board" -body {
+    set board [GoBoard new {
+        "  B  "
+        " B B "
+        "B W B"
+        " W W "
+        "  W  "
+    }]
+    $board territory {1 4}
+} -returnCodes ok -match orderedLists -result {none {{0 3} {0 4} {1 4}}}
+
+
+skip go-counting-4
+test go-counting-4 "A stone and not a territory on 5x5 board" -body {
+    set board [GoBoard new {
+        "  B  "
+        " B B "
+        "B W B"
+        " W W "
+        "  W  "
+    }]
+    $board territory {1 1}
+} -returnCodes ok -match orderedLists -result {none {}}
+
+
+skip go-counting-5
+test go-counting-5 "Invalid because X is too low for 5x5 board" -body {
+    set board [GoBoard new {
+        "  B  "
+        " B B "
+        "B W B"
+        " W W "
+        "  W  "
+    }]
+    $board territory {-1 1}
+} -returnCodes error -result "Invalid coordinate"
+
+
+skip go-counting-6
+test go-counting-6 "Invalid because X is too high for 5x5 board" -body {
+    set board [GoBoard new {
+        "  B  "
+        " B B "
+        "B W B"
+        " W W "
+        "  W  "
+    }]
+    $board territory {5 1}
+} -returnCodes error -result "Invalid coordinate"
+
+
+skip go-counting-7
+test go-counting-7 "Invalid because Y is too low for 5x5 board" -body {
+    set board [GoBoard new {
+        "  B  "
+        " B B "
+        "B W B"
+        " W W "
+        "  W  "
+    }]
+    $board territory {1 -1}
+} -returnCodes error -result "Invalid coordinate"
+
+
+skip go-counting-8
+test go-counting-8 "Invalid because Y is too high for 5x5 board" -body {
+    set board [GoBoard new {
+        "  B  "
+        " B B "
+        "B W B"
+        " W W "
+        "  W  "
+    }]
+    $board territory {1 5}
+} -returnCodes error -result "Invalid coordinate"
+
+
+skip go-counting-9
+test go-counting-9 "One territory is the whole board" -body {
+    set board [GoBoard new {
+        " "
+    }]
+    $board territories
+} -returnCodes ok -match dictionary -result {
+    black {}
+    white {}
+    none {{0 0}}
+}
+
+skip go-counting-10
+test go-counting-10 "Two territory rectangular board" -body {
+    set board [GoBoard new {
+        " BW "
+        " BW "
+    }]
+    $board territories
+} -returnCodes ok -match dictionary -result {
+    black {{0 0} {0 1}}
+    white {{3 0} {3 1}}
+    none {}
+}
+
+skip go-counting-11
+test go-counting-11 "Two region rectangular board" -body {
+    set board [GoBoard new {
+        " B "
+    }]
+    $board territories
+} -returnCodes ok -match dictionary -result {
+    black {{0 0} {2 0}}
+    white {}
+    none {}
+}
+
 
 cleanupTests

@@ -1,44 +1,59 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-18T02:06:11Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
-
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
+############################################################
+source "leap.tcl"
 
 
-# Since Tcl boolean values can be more than just 0/1...
-#   set a yes; set b true
-#   expr  {$a == $b}     ;# => 0
-#   expr  {$a && $b}     ;# => 1
-#   expr  {!!$a == !!$b} ;# => 1
-#   set a off; set b no
-#   expr {$a == $b}      ;# => 0
-#   expr {$a && $b}      ;# => 0
-#   expr {!!$a == !!$b}  ;# => 1
-#
-proc booleanMatch {expected actual} {
-    return [expr {
-        [string is boolean -strict $expected] &&
-        [string is boolean -strict $actual] &&
-        !!$expected == !!$actual
-    }]
-}
-customMatch boolean booleanMatch
+test leap-1 "year not divisible by 4 in common year" -body {
+    isLeapYear 2015
+} -returnCodes ok -match boolean -result false
+
+skip leap-2
+test leap-2 "year divisible by 2, not divisible by 4 in common year" -body {
+    isLeapYear 1970
+} -returnCodes ok -match boolean -result false
+
+skip leap-3
+test leap-3 "year divisible by 4, not divisible by 100 in leap year" -body {
+    isLeapYear 1996
+} -returnCodes ok -match boolean -result true
+
+skip leap-4
+test leap-4 "year divisible by 4 and 5 is still a leap year" -body {
+    isLeapYear 1960
+} -returnCodes ok -match boolean -result true
+
+skip leap-5
+test leap-5 "year divisible by 100, not divisible by 400 in common year" -body {
+    isLeapYear 2100
+} -returnCodes ok -match boolean -result false
+
+skip leap-6
+test leap-6 "year divisible by 100 but not by 3 is still not a leap year" -body {
+    isLeapYear 1900
+} -returnCodes ok -match boolean -result false
+
+skip leap-7
+test leap-7 "year divisible by 400 is leap year" -body {
+    isLeapYear 2000
+} -returnCodes ok -match boolean -result true
+
+skip leap-8
+test leap-8 "year divisible by 400 but not by 125 is still a leap year" -body {
+    isLeapYear 2400
+} -returnCodes ok -match boolean -result true
+
+skip leap-9
+test leap-9 "year divisible by 200, not divisible by 400 in common year" -body {
+    isLeapYear 1800
+} -returnCodes ok -match boolean -result false
+
+
+cleanupTests

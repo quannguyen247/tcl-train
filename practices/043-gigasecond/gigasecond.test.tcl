@@ -1,9 +1,44 @@
-package require tcltest 2
-namespace import tcltest::*
+#!/usr/bin/env tclsh
+# generated: 2026-07-17T23:38:20Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
+
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
 source "gigasecond.tcl"
 
-test 043-gigasecond-1 "Dummy test to pass" -body {
-    expr {1}
-} -returnCodes 0 -result 1
+
+test gigasecond-1 "date only specification of time" -body {
+    addGigasecond "2011-04-25"
+} -returnCodes ok -result "2043-01-01T01:46:40"
+
+skip gigasecond-2
+test gigasecond-2 "second test for date only specification of time" -body {
+    addGigasecond "1977-06-13"
+} -returnCodes ok -result "2009-02-19T01:46:40"
+
+skip gigasecond-3
+test gigasecond-3 "third test for date only specification of time" -body {
+    addGigasecond "1959-07-19"
+} -returnCodes ok -result "1991-03-27T01:46:40"
+
+skip gigasecond-4
+test gigasecond-4 "full time specified" -body {
+    addGigasecond "2015-01-24T22:00:00"
+} -returnCodes ok -result "2046-10-02T23:46:40"
+
+skip gigasecond-5
+test gigasecond-5 "full time with day roll-over" -body {
+    addGigasecond "2015-01-24T23:59:59"
+} -returnCodes ok -result "2046-10-03T01:46:39"
+
+# bonus test
+skip gigasecond-6
+test gigasecond-6 "free-form datetime string" -body {
+    addGigasecond "thu march 2, 1978 1:23 PM"
+} -returnCodes ok -result "2009-11-08T15:09:40"
 
 cleanupTests

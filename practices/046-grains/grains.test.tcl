@@ -1,9 +1,69 @@
-package require tcltest 2
-namespace import tcltest::*
+#!/usr/bin/env tclsh
+# generated: 2026-07-18T00:30:44Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
+
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
 source "grains.tcl"
 
-test 046-grains-1 "Dummy test to pass" -body {
-    expr {1}
-} -returnCodes 0 -result 1
+
+test grains-1 "grains on square 1" -body {
+    grains square 1
+} -returnCodes ok -result 1
+
+skip grains-2
+test grains-2 "grains on square 2" -body {
+    grains square 2
+} -returnCodes ok -result 2
+
+skip grains-3
+test grains-3 "grains on square 3" -body {
+    grains square 3
+} -returnCodes ok -result 4
+
+skip grains-4
+test grains-4 "grains on square 4" -body {
+    grains square 4
+} -returnCodes ok -result 8
+
+skip grains-5
+test grains-5 "grains on square 16" -body {
+    grains square 16
+} -returnCodes ok -result 32768
+
+skip grains-6
+test grains-6 "grains on square 32" -body {
+    grains square 32
+} -returnCodes ok -result 2147483648
+
+skip grains-7
+test grains-7 "grains on square 64" -body {
+    grains square 64
+} -returnCodes ok -result 9223372036854775808
+
+skip grains-8
+test grains-8 "square 0 is invalid" -body {
+    grains square 0
+} -returnCodes error -result "square must be between 1 and 64"
+
+skip grains-9
+test grains-9 "negative square is invalid" -body {
+    grains square -1
+} -returnCodes error -result "square must be between 1 and 64"
+
+skip grains-10
+test grains-10 "square greater than 64 is invalid" -body {
+    grains square 65
+} -returnCodes error -result "square must be between 1 and 64"
+
+skip grains-11
+test grains-11 "returns the total number of grains on the board" -body {
+    grains total
+} -returnCodes ok -result 18446744073709551615
+
 
 cleanupTests

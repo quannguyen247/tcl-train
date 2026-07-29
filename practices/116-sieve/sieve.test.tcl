@@ -1,20 +1,39 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T02:10:41Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "sieve.tcl"
+
+
+test sieve-1 "no primes under two" -body {
+    primes 1
+} -returnCodes ok -result {}
+
+skip sieve-2
+test sieve-2 "find first prime" -body {
+    primes 2
+} -returnCodes ok -result {2}
+
+skip sieve-3
+test sieve-3 "find primes up to 10" -body {
+    primes 10
+} -returnCodes ok -result {2 3 5 7}
+
+skip sieve-4
+test sieve-4 "limit is prime" -body {
+    primes 13
+} -returnCodes ok -result {2 3 5 7 11 13}
+
+skip sieve-5
+test sieve-5 "find primes up to 1000" -body {
+    primes 1000
+} -returnCodes ok -result {2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79 83 89 97 101 103 107 109 113 127 131 137 139 149 151 157 163 167 173 179 181 191 193 197 199 211 223 227 229 233 239 241 251 257 263 269 271 277 281 283 293 307 311 313 317 331 337 347 349 353 359 367 373 379 383 389 397 401 409 419 421 431 433 439 443 449 457 461 463 467 479 487 491 499 503 509 521 523 541 547 557 563 569 571 577 587 593 599 601 607 613 617 619 631 641 643 647 653 659 661 673 677 683 691 701 709 719 727 733 739 743 751 757 761 769 773 787 797 809 811 821 823 827 829 839 853 857 859 863 877 881 883 887 907 911 919 929 937 941 947 953 967 971 977 983 991 997}
+
+
+cleanupTests

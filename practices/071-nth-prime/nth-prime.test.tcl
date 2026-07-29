@@ -1,20 +1,39 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-18T18:51:02Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "nth-prime.tcl"
+
+
+test nth-prime-1 "first prime" -body {
+    nthPrime 1
+} -returnCodes ok -result 2
+
+skip nth-prime-2
+test nth-prime-2 "second prime" -body {
+    nthPrime 2
+} -returnCodes ok -result 3
+
+skip nth-prime-3
+test nth-prime-3 "sixth prime" -body {
+    nthPrime 6
+} -returnCodes ok -result 13
+
+skip nth-prime-4
+test nth-prime-4 "big prime" -body {
+    nthPrime 10001
+} -returnCodes ok -result 104743
+
+skip nth-prime-5
+test nth-prime-5 "there is no zeroth prime" -body {
+    nthPrime 0
+} -returnCodes error -result "there is no zeroth prime"
+
+
+cleanupTests

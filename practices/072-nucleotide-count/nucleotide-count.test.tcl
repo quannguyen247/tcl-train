@@ -1,54 +1,39 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-18T18:53:58Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
-
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
+############################################################
+source "nucleotide-count.tcl"
 
 
-# Compare two dictionaries for the same keys and same values
-proc dictionaryMatch {expected actual} {
-    if {[dict size $expected] != [dict size $actual]} {
-        return false
-    }
-    dict for {key value} $expected {
-        if {![dict exists $actual $key]} {
-            return false
-        }
-        set actualValue [dict get $actual $key]
+test nucleotide-count-1 "empty strand" -body {
+    nucleotideCounts ""
+} -returnCodes ok -match dictionary -result {A 0 C 0 G 0 T 0}
 
-        # if this value is a dict then recurse, 
-        # else just check for string equality
-        if {[string is list -strict $value] &&
-            [llength $value] > 1 && 
-            [llength $value] % 2 == 0
-        } {
-            set procname [lindex [info level 0] 0]
-            if {![$procname $value $actualValue]} {
-                return false
-            }
-        } elseif {$actualValue ne $value} {
-            return false
-        }
-    }
-    return true
-}
-customMatch dictionary dictionaryMatch
+skip nucleotide-count-2
+test nucleotide-count-2 "can count one nucleotide in single-character input" -body {
+    nucleotideCounts "G"
+} -returnCodes ok -match dictionary -result {A 0 C 0 G 1 T 0}
+
+skip nucleotide-count-3
+test nucleotide-count-3 "strand with repeated nucleotide" -body {
+    nucleotideCounts "GGGGGGG"
+} -returnCodes ok -match dictionary -result {A 0 C 0 G 7 T 0}
+
+skip nucleotide-count-4
+test nucleotide-count-4 "strand with multiple nucleotides" -body {
+    nucleotideCounts "AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC"
+} -returnCodes ok -match dictionary -result {A 20 C 12 G 17 T 21}
+
+skip nucleotide-count-5
+test nucleotide-count-5 "strand with invalid nucleotides" -body {
+    nucleotideCounts "AGXXACT"
+} -returnCodes error -result "Invalid nucleotide in strand"
+
+
+cleanupTests

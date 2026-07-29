@@ -1,21 +1,64 @@
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T03:45:50Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
+
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
+source "space-age.tcl"
+
 #############################################################
-# Override some tcltest procs with additional functionality
-
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
+# Convenience function to set the precision of a real number.
+proc roundTo {precision number} {
+    return [format {%.*f} $precision $number]
 }
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+test space-age-1 "age on Earth" -body {
+    roundTo 2 [onEarth 1000000000]
+} -returnCodes ok -result 31.69
 
+skip space-age-2
+test space-age-2 "age on Mercury" -body {
+    roundTo 2 [onMercury 2134835688]
+} -returnCodes ok -result 280.88
+
+skip space-age-3
+test space-age-3 "age on Venus" -body {
+    roundTo 2 [onVenus 189839836]
+} -returnCodes ok -result 9.78
+
+skip space-age-4
+test space-age-4 "age on Mars" -body {
+    roundTo 2 [onMars 2129871239]
+} -returnCodes ok -result 35.88
+
+skip space-age-5
+test space-age-5 "age on Jupiter" -body {
+    roundTo 2 [onJupiter 901876382]
+} -returnCodes ok -result 2.41
+
+skip space-age-6
+test space-age-6 "age on Saturn" -body {
+    roundTo 2 [onSaturn 2000000000]
+} -returnCodes ok -result 2.15
+
+skip space-age-7
+test space-age-7 "age on Uranus" -body {
+    roundTo 2 [onUranus 1210123456]
+} -returnCodes ok -result 0.46
+
+skip space-age-8
+test space-age-8 "age on Neptune" -body {
+    roundTo 2 [onNeptune 1821023456]
+} -returnCodes ok -result 0.35
+
+skip space-age-9
+test space-age-9 "invalid planet causes error" -body {
+    roundTo 2 [onSun 680804807]
+} -returnCodes error -result "not a planet"
+
+
+cleanupTests

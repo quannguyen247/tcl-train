@@ -1,61 +1,91 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T18:27:30Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
-
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
-
-# Copy the needed procs into your test file.  Use it like this:
-#
-#    customMatch dictionary dictionaryMatch
-#    test name "description" -body {
-#        code that returns a dictionary
-#    } -match dictionary -result {expected dictionary value here}
+############################################################
+source "two-bucket.tcl"
 
 
-# Compare two dictionaries for the same keys and same values
-proc dictionaryMatch {expected actual} {
-    if {[dict size $expected] != [dict size $actual]} {
-        return false
-    }
-    dict for {key value} $expected {
-        if {![dict exists $actual $key]} {
-            return false
-        }
-        set actualValue [dict get $actual $key]
+test two-bucket-1 "Measure using bucket one of size 3 and bucket two of size 5 - start with bucket one" \
+    -body {twoBucket {bucketOne 3 bucketTwo 5 goal 1 startBucket one}} \
+    -returnCodes ok \
+    -match dictionary \
+    -result {moves 4 goalBucket one otherBucket 5}
 
-        # if this value is a dict then recurse, 
-        # else just check for string equality
-        if {[string is list -strict $value] &&
-            [llength $value] > 1 && 
-            [llength $value] % 2 == 0
-        } {
-            set procname [lindex [info level 0] 0]
-            if {![$procname $value $actualValue]} {
-                return false
-            }
-        } elseif {$actualValue ne $value} {
-            return false
-        }
-    }
-    return true
-}
-customMatch dictionary dictionaryMatch
+skip two-bucket-2
+test two-bucket-2 "Measure using bucket one of size 3 and bucket two of size 5 - start with bucket two" \
+    -body {twoBucket {bucketOne 3 bucketTwo 5 goal 1 startBucket two}} \
+    -returnCodes ok \
+    -match dictionary \
+    -result {moves 8 goalBucket two otherBucket 3}
+
+skip two-bucket-3
+test two-bucket-3 "Measure using bucket one of size 7 and bucket two of size 11 - start with bucket one" \
+    -body {twoBucket {bucketOne 7 bucketTwo 11 goal 2 startBucket one}} \
+    -returnCodes ok \
+    -match dictionary \
+    -result {moves 14 goalBucket one otherBucket 11}
+
+skip two-bucket-4
+test two-bucket-4 "Measure using bucket one of size 7 and bucket two of size 11 - start with bucket two" \
+    -body {twoBucket {bucketOne 7 bucketTwo 11 goal 2 startBucket two}} \
+    -returnCodes ok \
+    -match dictionary \
+    -result {moves 18 goalBucket two otherBucket 7}
+
+skip two-bucket-5
+test two-bucket-5 "Measure one step using bucket one of size 1 and bucket two of size 3 - start with bucket two" \
+    -body {twoBucket {bucketOne 1 bucketTwo 3 goal 3 startBucket two}} \
+    -returnCodes ok \
+    -match dictionary \
+    -result {moves 1 goalBucket two otherBucket 0}
+
+skip two-bucket-6
+test two-bucket-6 "Measure using bucket one of size 2 and bucket two of size 3 - start with bucket one and end with bucket two" \
+    -body {twoBucket {bucketOne 2 bucketTwo 3 goal 3 startBucket one}} \
+    -returnCodes ok \
+    -match dictionary \
+    -result {moves 2 goalBucket two otherBucket 2}
+
+skip two-bucket-7
+test two-bucket-7 "Measure using bucket one much bigger than bucket two" \
+    -body {twoBucket {bucketOne 5 bucketTwo 1 goal 2 startBucket one}} \
+    -returnCodes ok \
+    -match dictionary \
+    -result {moves 6 goalBucket one otherBucket 1}
+
+skip two-bucket-8
+test two-bucket-8 "Measure using bucket one much smaller than bucket two" \
+    -body {twoBucket {bucketOne 3 bucketTwo 15 goal 9 startBucket one}} \
+    -returnCodes ok \
+    -match dictionary \
+    -result {moves 6 goalBucket two otherBucket 0}
+
+skip two-bucket-9
+test two-bucket-9 "Not possible to reach the goal" \
+    -body {twoBucket {bucketOne 6 bucketTwo 15 goal 5 startBucket one}} \
+    -returnCodes error \
+    -match glob \
+    -result "*impossible*"
+
+skip two-bucket-10
+test two-bucket-10 "With the same buckets but a different goal, then it is possible" \
+    -body {twoBucket {bucketOne 6 bucketTwo 15 goal 9 startBucket one}} \
+    -returnCodes ok \
+    -match dictionary \
+    -result {moves 10 goalBucket two otherBucket 0}
+
+skip two-bucket-11
+test two-bucket-11 "Goal larger than both buckets is impossible" \
+    -body {twoBucket {bucketOne 5 bucketTwo 7 goal 8 startBucket one}} \
+    -returnCodes error \
+    -match glob \
+    -result "*impossible*"
+
+
+cleanupTests

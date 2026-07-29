@@ -1,20 +1,62 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-18T18:39:49Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "matrix.tcl"
+
+
+test matrix-1 "extract row from one number matrix" -body {
+    set matrix [matrixFrom "1"]
+    row $matrix 1
+} -returnCodes ok -result {1}
+
+skip matrix-2
+test matrix-2 "can extract row" -body {
+    set matrix [matrixFrom "1 2\n3 4"]
+    row $matrix 2
+} -returnCodes ok -result {3 4}
+
+skip matrix-3
+test matrix-3 "extract row where numbers have different widths" -body {
+    set matrix [matrixFrom "1 2\n10 20"]
+    row $matrix 2
+} -returnCodes ok -result {10 20}
+
+skip matrix-4
+test matrix-4 "can extract row from non-square matrix with no corresponding column" -body {
+    set matrix [matrixFrom "1 2 3\n4 5 6\n7 8 9\n8 7 6"]
+    row $matrix 4
+} -returnCodes ok -result {8 7 6}
+
+skip matrix-5
+test matrix-5 "extract column from one number matrix" -body {
+    set matrix [matrixFrom "1"]
+    column $matrix 1
+} -returnCodes ok -result {1}
+
+skip matrix-6
+test matrix-6 "can extract column" -body {
+    set matrix [matrixFrom "1 2 3\n4 5 6\n7 8 9"]
+    column $matrix 3
+} -returnCodes ok -result {3 6 9}
+
+skip matrix-7
+test matrix-7 "can extract column from non-square matrix with no corresponding row" -body {
+    set matrix [matrixFrom "1 2 3 4\n5 6 7 8\n9 8 7 6"]
+    column $matrix 4
+} -returnCodes ok -result {4 8 6}
+
+skip matrix-8
+test matrix-8 "extract column where numbers have different widths" -body {
+    set matrix [matrixFrom "89 1903 3\n18 3 1\n9 4 800"]
+    column $matrix 2
+} -returnCodes ok -result {1903 3 4}
+
+
+cleanupTests

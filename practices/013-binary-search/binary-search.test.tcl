@@ -1,20 +1,69 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-16T22:13:58Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "binary-search.tcl"
+
+
+test binary-search-1 "finds a value in an array with one element" -body {
+    binarySearch {6} 6
+} -returnCodes ok -result 0
+
+skip binary-search-2
+test binary-search-2 "finds a value in the middle of an array" -body {
+    binarySearch {1 3 4 6 8 9 11} 6
+} -returnCodes ok -result 3
+
+skip binary-search-3
+test binary-search-3 "finds a value at the beginning of an array" -body {
+    binarySearch {1 3 4 6 8 9 11} 1
+} -returnCodes ok -result 0
+
+skip binary-search-4
+test binary-search-4 "finds a value at the end of an array" -body {
+    binarySearch {1 3 4 6 8 9 11} 11
+} -returnCodes ok -result 6
+
+skip binary-search-5
+test binary-search-5 "finds a value in an array of odd length" -body {
+    binarySearch {1 3 5 8 13 21 34 55 89 144 233 377 634} 144
+} -returnCodes ok -result 9
+
+skip binary-search-6
+test binary-search-6 "finds a value in an array of even length" -body {
+    binarySearch {1 3 5 8 13 21 34 55 89 144 233 377} 21
+} -returnCodes ok -result 5
+
+skip binary-search-7
+test binary-search-7 "identifies that a value is not included in the array" -body {
+    binarySearch {1 3 4 6 8 9 11} 7
+} -returnCodes ok -result -1
+
+skip binary-search-8
+test binary-search-8 "a value smaller than the array's smallest value is not found" -body {
+    binarySearch {1 3 4 6 8 9 11} 0
+} -returnCodes ok -result -1
+
+skip binary-search-9
+test binary-search-9 "a value larger than the array's largest value is not found" -body {
+    binarySearch {1 3 4 6 8 9 11} 13
+} -returnCodes ok -result -1
+
+skip binary-search-10
+test binary-search-10 "nothing is found in an empty array" -body {
+    binarySearch {} 1
+} -returnCodes ok -result -1
+
+skip binary-search-11
+test binary-search-11 "nothing is found when the left and right bounds cross" -body {
+    binarySearch {1 2} 0
+} -returnCodes ok -result -1
+
+
+cleanupTests

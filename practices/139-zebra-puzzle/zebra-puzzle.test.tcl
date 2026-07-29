@@ -1,20 +1,26 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T19:15:41Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "zebra-puzzle.tcl"
+
+
+test zebra-puzzle-1 "resident who drinks water" -body {
+    set zp [ZebraPuzzle new]
+    $zp drinksWater
+} -returnCodes ok -result "Norwegian"
+
+skip zebra-puzzle-2
+test zebra-puzzle-2 "resident who owns zebra" -body {
+    set zp [ZebraPuzzle new]
+    $zp ownsZebra
+} -returnCodes ok -result "Japanese"
+
+
+cleanupTests

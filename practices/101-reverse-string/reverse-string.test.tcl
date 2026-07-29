@@ -1,20 +1,49 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-23T15:37:39Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "reverse-string.tcl"
+
+
+test reverse-string-1 "an empty string" -body {
+    reverse ""
+} -returnCodes ok -result ""
+
+skip reverse-string-2
+test reverse-string-2 "a word" -body {
+    reverse "robot"
+} -returnCodes ok -result "tobor"
+
+skip reverse-string-3
+test reverse-string-3 "a capitalized word" -body {
+    reverse "Ramen"
+} -returnCodes ok -result "nemaR"
+
+skip reverse-string-4
+test reverse-string-4 "a sentence with punctuation" -body {
+    reverse "I'm hungry!"
+} -returnCodes ok -result "!yrgnuh m'I"
+
+skip reverse-string-5
+test reverse-string-5 "a palindrome" -body {
+    reverse "racecar"
+} -returnCodes ok -result "racecar"
+
+skip reverse-string-6
+test reverse-string-6 "an even-sized word" -body {
+    reverse "drawer"
+} -returnCodes ok -result "reward"
+
+skip reverse-string-7
+test reverse-string-7 "wide characters" -body {
+    reverse "子猫"
+} -returnCodes ok -result "猫子"
+
+
+cleanupTests

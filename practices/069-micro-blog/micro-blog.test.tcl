@@ -1,95 +1,74 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-18T18:47:22Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
-
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
+############################################################
+source "micro-blog.tcl"
 
 
-# Compare two ordered lists without comparing the lists themselves 
-# as strings.
-# e.g.
-#     set first {
-#         a  b  c
-#     }
-#     set second [list a b c]
-#     expr {$first eq $second}           ;# 0
-#     expr {$first == $second}           ;# 0
-#     orderedListsMatch $first $second   ;# true
-#
-proc orderedListsMatch {expected actual} {
-    if {[llength $expected] != [llength $actual]} {
-        return false
-    }
-    foreach e $expected a $actual {
-        if {$e != $a} {
-            return false
-        }
-    }
-    return true
-}
-customMatch orderedLists orderedListsMatch
+test micro-blog-1 "English language short" -body {
+    truncate "Hi"
+} -returnCodes ok -match exact -result "Hi"
+
+skip micro-blog-2
+test micro-blog-2 "English language long" -body {
+    truncate "Hello there"
+} -returnCodes ok -match exact -result "Hello"
+
+skip micro-blog-3
+test micro-blog-3 "German language short (broth)" -body {
+    truncate "brühe"
+} -returnCodes ok -match exact -result "brühe"
+
+skip micro-blog-4
+test micro-blog-4 "German language long (bear carpet → beards)" -body {
+    truncate "Bärteppich"
+} -returnCodes ok -match exact -result "Bärte"
+
+skip micro-blog-5
+test micro-blog-5 "Bulgarian language short (good)" -body {
+    truncate "Добър"
+} -returnCodes ok -match exact -result "Добър"
+
+skip micro-blog-6
+test micro-blog-6 "Greek language short (health)" -body {
+    truncate "υγειά"
+} -returnCodes ok -match exact -result "υγειά"
+
+skip micro-blog-7
+test micro-blog-7 "Maths short" -body {
+    truncate "a=πr²"
+} -returnCodes ok -match exact -result "a=πr²"
+
+skip micro-blog-8
+test micro-blog-8 "Maths long" -body {
+    truncate "∅⊊ℕ⊊ℤ⊊ℚ⊊ℝ⊊ℂ"
+} -returnCodes ok -match exact -result "∅⊊ℕ⊊ℤ"
+
+skip micro-blog-9
+test micro-blog-9 "English and emoji short" -body {
+    truncate "Fly 🛫"
+} -returnCodes ok -match exact -result "Fly 🛫"
+
+skip micro-blog-10
+test micro-blog-10 "Emoji short" -body {
+    truncate "💇"
+} -returnCodes ok -match exact -result "💇"
+
+skip micro-blog-11
+test micro-blog-11 "Emoji long" -body {
+    truncate "❄🌡🤧🤒🏥🕰😀"
+} -returnCodes ok -match exact -result "❄🌡🤧🤒🏥"
+
+skip micro-blog-12
+test micro-blog-12 "Royal Flush?" -body {
+    truncate "🃎🂸🃅🃋🃍🃁🃊"
+} -returnCodes ok -match exact -result "🃎🂸🃅🃋🃍"
 
 
-# two lists have the same elements, in no particular order
-proc unorderedListsMatch {expected actual} {
-    if {[llength $expected] != [llength $actual]} {
-        return false
-    }
-    foreach elem $expected {
-        if {[lsearch -exact $actual $elem] == -1} {
-            return false
-        }
-    }
-    return true
-}
-customMatch unorderedLists unorderedListsMatch
-
-
-# The expected value is one of a list of values.
-proc inListMatch {expectedList actual} {
-    return [expr {$actual in $expectedList}]
-}
-customMatch inList inListMatch
-
-
-# Compare floating point numbers 
-proc floatMatch {expected actual {epsilon 1e-6}} {
-    return [expr {abs($expected - $actual) <= $epsilon}]
-}
-customMatch float floatMatch
-
-
-# Compare a list of floating point numbers 
-proc listOfFloatsMatch {expected actual} {
-    foreach e $expected a $actual {
-        if {![floatMatch $e $a]} {
-            return false
-        }
-    }
-    return true
-}
-
-#############################################################
-# Convenience function to set the precision of a real number.
-proc roundTo {precision number} {
-    return [format {%.*f} $precision $number]
-}
+cleanupTests

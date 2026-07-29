@@ -1,54 +1,159 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-16T22:56:45Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
+source "binary-search-tree.tcl"
+
+
+test binary-search-tree-1 "data is retained" -body {
+    set b [BinarySearchTree new]
+    $b insert 4
+    $b toDict
+} -returnCodes ok -match dictionary -result {
+  data 4
+  left {}
+  right {}
 }
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
+skip binary-search-tree-2
+test binary-search-tree-2 "insert data at proper node: smaller number at left node" -body {
+    set b [BinarySearchTree new]
+    $b insert 4
+    $b insert 2
+    $b toDict
+} -returnCodes ok -match dictionary -result {
+  data 4
+  left {
+    data 2
+    left {}
+    right {}
+  }
+  right {}
 }
 
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
-
-
-# Compare two dictionaries for the same keys and same values
-proc dictionaryMatch {expected actual} {
-    if {[dict size $expected] != [dict size $actual]} {
-        return false
-    }
-    dict for {key value} $expected {
-        if {![dict exists $actual $key]} {
-            return false
-        }
-        set actualValue [dict get $actual $key]
-
-        # if this value is a dict then recurse, 
-        # else just check for string equality
-        if {[string is list -strict $value] &&
-            [llength $value] > 1 && 
-            [llength $value] % 2 == 0
-        } {
-            set procname [lindex [info level 0] 0]
-            if {![$procname $value $actualValue]} {
-                return false
-            }
-        } elseif {$actualValue ne $value} {
-            return false
-        }
-    }
-    return true
+skip binary-search-tree-3
+test binary-search-tree-3 "insert data at proper node: same number at left node" -body {
+    set b [BinarySearchTree new]
+    $b insert 4
+    $b insert 4
+    $b toDict
+} -returnCodes ok -match dictionary -result {
+  data 4
+  left {
+    data 4
+    left {}
+    right {}
+  }
+  right {}
 }
-customMatch dictionary dictionaryMatch
+
+skip binary-search-tree-4
+test binary-search-tree-4 "insert data at proper node: greater number at right node" -body {
+    set b [BinarySearchTree new]
+    $b insert 4
+    $b insert 5
+    $b toDict
+} -returnCodes ok -match dictionary -result {
+  data 4
+  left {}
+  right {
+    data 5
+    left {}
+    right {}
+  }
+}
+
+skip binary-search-tree-5
+test binary-search-tree-5 "can create complex tree" -body {
+    set b [BinarySearchTree new]
+    foreach n {4 2 6 1 3 5 7} {
+        $b insert $n
+    }
+    $b toDict
+} -returnCodes ok -match dictionary -result {
+  data 4
+  left {
+    data 2
+    left {
+      data 1
+      left {}
+      right {}
+    }
+    right {
+      data 3
+      left {}
+      right {}
+    }
+  }
+  right {
+    data 6
+    left {
+      data 5
+      left {}
+      right {}
+    }
+    right {
+      data 7
+      left {}
+      right {}
+    }
+  }
+}
+
+skip binary-search-tree-6
+test binary-search-tree-6 "can sort data: can sort single number" -body {
+    set b [BinarySearchTree new]
+    $b insert 2
+    $b sorted
+} -returnCodes ok -result {2}
+
+skip binary-search-tree-7
+test binary-search-tree-7 "can sort data: can sort if second number is smaller than first" -body {
+    set b [BinarySearchTree new]
+    $b insert 2
+    $b insert 1
+    $b sorted
+} -returnCodes ok -result {1 2}
+
+skip binary-search-tree-8
+test binary-search-tree-8 "can sort data: can sort if second number is same as first" -body {
+    set b [BinarySearchTree new]
+    $b insert 2
+    $b insert 2
+    $b sorted
+} -returnCodes ok -result {2 2}
+
+skip binary-search-tree-9
+test binary-search-tree-9 "can sort data: can sort if second number is greater than first" -body {
+    set b [BinarySearchTree new]
+    $b insert 2
+    $b insert 3
+    $b sorted
+} -returnCodes ok -result {2 3}
+
+skip binary-search-tree-10
+test binary-search-tree-10 "can sort data: can sort complex tree" -body {
+    set b [BinarySearchTree new]
+    foreach n {2 1 3 6 7 5} {
+        $b insert $n
+    }
+    $b sorted
+} -returnCodes ok -result {1 2 3 5 6 7}
+
+skip binary-search-tree-extra-challenge
+test binary-search-tree-extra-challenge "can iterate over sorted data" -body {
+    set b [BinarySearchTree new]
+    foreach n {4 2 6 1 3 5 7} {
+        $b insert $n
+    }
+    $b map node {expr {[$node data] + 10}}
+} -returnCodes ok -result {11 12 13 14 15 16 17}
+
+
+cleanupTests

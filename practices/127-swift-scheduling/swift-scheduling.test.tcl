@@ -1,20 +1,94 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T17:59:39Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+############################################################
+source "swift-scheduling.tcl"
+
+
+test swift-scheduling-1 "NOW translates to two hours later" -body {
+    deliveryDate "2012-02-13T09:00:00" "NOW"
+} -returnCodes ok -result "2012-02-13T11:00:00"
+
+skip swift-scheduling-2
+test swift-scheduling-2 "ASAP before one in the afternoon translates to today at five in the afternoon" -body {
+    deliveryDate "1999-06-03T09:45:00" "ASAP"
+} -returnCodes ok -result "1999-06-03T17:00:00"
+
+skip swift-scheduling-3
+test swift-scheduling-3 "ASAP at one in the afternoon translates to tomorrow at one in the afternoon" -body {
+    deliveryDate "2008-12-21T13:00:00" "ASAP"
+} -returnCodes ok -result "2008-12-22T13:00:00"
+
+skip swift-scheduling-4
+test swift-scheduling-4 "ASAP after one in the afternoon translates to tomorrow at one in the afternoon" -body {
+    deliveryDate "2008-12-21T14:50:00" "ASAP"
+} -returnCodes ok -result "2008-12-22T13:00:00"
+
+skip swift-scheduling-5
+test swift-scheduling-5 "EOW on Monday translates to Friday at five in the afternoon" -body {
+    deliveryDate "2025-02-03T16:00:00" "EOW"
+} -returnCodes ok -result "2025-02-07T17:00:00"
+
+skip swift-scheduling-6
+test swift-scheduling-6 "EOW on Tuesday translates to Friday at five in the afternoon" -body {
+    deliveryDate "1997-04-29T10:50:00" "EOW"
+} -returnCodes ok -result "1997-05-02T17:00:00"
+
+skip swift-scheduling-7
+test swift-scheduling-7 "EOW on Wednesday translates to Friday at five in the afternoon" -body {
+    deliveryDate "2005-09-14T11:00:00" "EOW"
+} -returnCodes ok -result "2005-09-16T17:00:00"
+
+skip swift-scheduling-8
+test swift-scheduling-8 "EOW on Thursday translates to Sunday at eight in the evening" -body {
+    deliveryDate "2011-05-19T08:30:00" "EOW"
+} -returnCodes ok -result "2011-05-22T20:00:00"
+
+skip swift-scheduling-9
+test swift-scheduling-9 "EOW on Friday translates to Sunday at eight in the evening" -body {
+    deliveryDate "2022-08-05T14:00:00" "EOW"
+} -returnCodes ok -result "2022-08-07T20:00:00"
+
+skip swift-scheduling-10
+test swift-scheduling-10 "EOW translates to leap day" -body {
+    deliveryDate "2008-02-25T10:30:00" "EOW"
+} -returnCodes ok -result "2008-02-29T17:00:00"
+
+skip swift-scheduling-11
+test swift-scheduling-11 "2M before the second month of this year translates to the first workday of the second month of this year" -body {
+    deliveryDate "2007-01-02T14:15:00" "2M"
+} -returnCodes ok -result "2007-02-01T08:00:00"
+
+skip swift-scheduling-12
+test swift-scheduling-12 "11M in the eleventh month translates to the first workday of the eleventh month of next year" -body {
+    deliveryDate "2013-11-21T15:30:00" "11M"
+} -returnCodes ok -result "2014-11-03T08:00:00"
+
+skip swift-scheduling-13
+test swift-scheduling-13 "4M in the ninth month translates to the first workday of the fourth month of next year" -body {
+    deliveryDate "2019-11-18T15:15:00" "4M"
+} -returnCodes ok -result "2020-04-01T08:00:00"
+
+skip swift-scheduling-14
+test swift-scheduling-14 "Q1 in the first quarter translates to the last workday of the first quarter of this year" -body {
+    deliveryDate "2003-01-01T10:45:00" "Q1"
+} -returnCodes ok -result "2003-03-31T08:00:00"
+
+skip swift-scheduling-15
+test swift-scheduling-15 "Q4 in the second quarter translates to the last workday of the fourth quarter of this year" -body {
+    deliveryDate "2001-04-09T09:00:00" "Q4"
+} -returnCodes ok -result "2001-12-31T08:00:00"
+
+skip swift-scheduling-16
+test swift-scheduling-16 "Q3 in the fourth quarter translates to the last workday of the third quarter of next year" -body {
+    deliveryDate "2022-10-06T11:00:00" "Q3"
+} -returnCodes ok -result "2023-09-29T08:00:00"
+
+
+cleanupTests

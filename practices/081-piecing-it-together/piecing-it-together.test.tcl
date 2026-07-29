@@ -1,61 +1,89 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-19T14:53:27Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
+
+############################################################
+source "piecing-it-together.tcl"
+
+
+test piecing-it-together-1 "1000 pieces puzzle with 1.6 aspect ratio" -body {
+    jigsawData {pieces 1000 aspectRatio 1.6}
+} -returnCodes ok -match dictionary -result {
+    pieces 1000
+    border 126
+    inside 874
+    rows 25
+    columns 40
+    aspectRatio 1.6
+    format landscape
 }
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
+skip piecing-it-together-2
+test piecing-it-together-2 "square puzzle with 32 rows" -body {
+    jigsawData {rows 32 format square}
+} -returnCodes ok -match dictionary -result {
+    pieces 1024
+    border 124
+    inside 900
+    rows 32
+    columns 32
+    aspectRatio 1.0
+    format square
 }
 
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
-
-# Copy the needed procs into your test file.  Use it like this:
-#
-#    customMatch dictionary dictionaryMatch
-#    test name "description" -body {
-#        code that returns a dictionary
-#    } -match dictionary -result {expected dictionary value here}
-
-
-# Compare two dictionaries for the same keys and same values
-proc dictionaryMatch {expected actual} {
-    if {[dict size $expected] != [dict size $actual]} {
-        return false
-    }
-    dict for {key value} $expected {
-        if {![dict exists $actual $key]} {
-            return false
-        }
-        set actualValue [dict get $actual $key]
-
-        # if this value is a dict then recurse, 
-        # else just check for string equality
-        if {[string is list -strict $value] &&
-            [llength $value] > 1 && 
-            [llength $value] % 2 == 0
-        } {
-            set procname [lindex [info level 0] 0]
-            if {![$procname $value $actualValue]} {
-                return false
-            }
-        } elseif {$actualValue ne $value} {
-            return false
-        }
-    }
-    return true
+skip piecing-it-together-3
+test piecing-it-together-3 "400 pieces square puzzle with only inside pieces and aspect ratio" -body {
+    jigsawData {inside 324 aspectRatio 1.0}
+} -returnCodes ok -match dictionary -result {
+    pieces 400
+    border 76
+    inside 324
+    rows 20
+    columns 20
+    aspectRatio 1.0
+    format square
 }
-customMatch dictionary dictionaryMatch
+
+skip piecing-it-together-4
+test piecing-it-together-4 "1500 pieces landscape puzzle with 30 rows and 1.6 aspect ratio" -body {
+    jigsawData {rows 30 aspectRatio 1.6666666666666667}
+} -returnCodes ok -match dictionary -result {
+    pieces 1500
+    border 156
+    inside 1344
+    rows 30
+    columns 50
+    aspectRatio 1.6666666666666667
+    format landscape
+}
+
+skip piecing-it-together-5
+test piecing-it-together-5 "300 pieces portrait puzzle with 70 border pieces" -body {
+    jigsawData {pieces 300 border 70 format portrait}
+} -returnCodes ok -match dictionary -result {
+    pieces 300
+    border 70
+    inside 230
+    rows 25
+    columns 12
+    aspectRatio 0.48
+    format portrait
+}
+
+skip piecing-it-together-6
+test piecing-it-together-6 "puzzle with insufficient data" -body {
+    jigsawData {pieces 1500 format landscape}
+} -returnCodes error -result "Insufficient data"
+
+skip piecing-it-together-7
+test piecing-it-together-7 "puzzle with contradictory data" -body {
+    jigsawData {rows 100 columns 1000 format square}
+} -returnCodes error -result "Contradictory data"
+
+
+cleanupTests

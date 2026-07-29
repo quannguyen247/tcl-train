@@ -1,49 +1,69 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+# generated: 2026-07-24T01:37:55Z
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
-}
+# Uncomment next line to view test durations.
+#configure -verbose {body error usec}
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
-
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
+############################################################
+source "secret-handshake.tcl"
 
 
-# Compare two ordered lists without comparing the lists themselves 
-# as strings.
-# e.g.
-#     set first {
-#         a  b  c
-#     }
-#     set second [list a b c]
-#     expr {$first eq $second}           ;# 0
-#     expr {$first == $second}           ;# 0
-#     orderedListsMatch $first $second   ;# true
-#
-proc orderedListsMatch {expected actual} {
-    if {[llength $expected] != [llength $actual]} {
-        return false
-    }
-    foreach e $expected a $actual {
-        if {$e != $a} {
-            return false
-        }
-    }
-    return true
-}
-customMatch orderedLists orderedListsMatch
+test secret-handshake-1 "wink for 1" -body {
+    secretHandshake 1
+} -returnCodes ok -match orderedLists -result {"wink"}
+
+skip secret-handshake-2
+test secret-handshake-2 "double blink for 10" -body {
+    secretHandshake 2
+} -returnCodes ok -match orderedLists -result {"double blink"}
+
+skip secret-handshake-3
+test secret-handshake-3 "close your eyes for 100" -body {
+    secretHandshake 4
+} -returnCodes ok -match orderedLists -result {"close your eyes"}
+
+skip secret-handshake-4
+test secret-handshake-4 "jump for 1000" -body {
+    secretHandshake 8
+} -returnCodes ok -match orderedLists -result {"jump"}
+
+skip secret-handshake-5
+test secret-handshake-5 "combine two actions" -body {
+    secretHandshake 3
+} -returnCodes ok -match orderedLists -result {"wink" "double blink"}
+
+skip secret-handshake-6
+test secret-handshake-6 "reverse two actions" -body {
+    secretHandshake 19
+} -returnCodes ok -match orderedLists -result {"double blink" "wink"}
+
+skip secret-handshake-7
+test secret-handshake-7 "reversing one action gives the same action" -body {
+    secretHandshake 24
+} -returnCodes ok -match orderedLists -result {"jump"}
+
+skip secret-handshake-8
+test secret-handshake-8 "reversing no actions still gives no actions" -body {
+    secretHandshake 16
+} -returnCodes ok -match orderedLists -result {}
+
+skip secret-handshake-9
+test secret-handshake-9 "all possible actions" -body {
+    secretHandshake 15
+} -returnCodes ok -match orderedLists -result {"wink" "double blink" "close your eyes" "jump"}
+
+skip secret-handshake-10
+test secret-handshake-10 "reverse all possible actions" -body {
+    secretHandshake 31
+} -returnCodes ok -match orderedLists -result {"jump" "close your eyes" "double blink" "wink"}
+
+skip secret-handshake-11
+test secret-handshake-11 "do nothing for zero" -body {
+    secretHandshake 0
+} -returnCodes ok -match orderedLists -result {}
+
+
+cleanupTests

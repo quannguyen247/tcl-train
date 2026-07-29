@@ -1,44 +1,131 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
+############################################################
+source "zipper.tcl"
+source "tree.tcl"
+
+# Uncomment for more verbose test output.
+# Ref: https://www.tcl.tk/man/tcl8.6/TclCmd/tcltest.html
+#configure -verbose {body error pass msec}
+
+test zipper-1 "data is retained" -body {
+    set tree [Tree new {value 1 left {value 2 right {value 3}} right {value 4}}]
+    set zipper [Zipper new $tree]
+    [$zipper tree] toDict
+} -returnCodes ok -result {value 1 left {value 2 right {value 3}} right {value 4}}
+
+skip zipper-2
+test zipper-2 "left, right and value" -body {
+    set tree [Tree new {value 1 left {value 2 right {value 3}} right {value 4}}]
+    set z [Zipper new $tree]
+    [[$z left] right] value
+} -returnCodes ok -result 3
+
+skip zipper-3
+test zipper-3 "dead end" -body {
+    set tree [Tree new {value 1 left {value 2 right {value 3}} right {value 4}}]
+    set z [Zipper new $tree]
+    [$z left] left
+} -returnCodes ok -result ""
+
+skip zipper-4
+test zipper-4 "tree from deep focus" -body {
+    set tree [Tree new {value 1 left {value 2 right {value 3}} right {value 4}}]
+    set z [[[Zipper new $tree] left] right]
+    [$z tree] toDict
+} -returnCodes ok -result {value 1 left {value 2 right {value 3}} right {value 4}}
+
+skip zipper-5
+test zipper-5 "traversing up from top" -body {
+    set tree [Tree new {value 1 left {value 2 right {value 3}} right {value 4}}]
+    [Zipper new $tree] up
+} -returnCodes ok -result ""
+
+skip zipper-6
+test zipper-6 "left, right, and up" -body {
+    set tree [Tree new {value 1 left {value 2 right {value 3}} right {value 4}}]
+    set z [Zipper new $tree]
+    foreach op {left up right up left right} {
+        set z [$z $op]
     }
-}
+    $z value
+} -returnCodes ok -result 3
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
-}
+skip zipper-7
+test zipper-7 "test ability to descend multiple levels and return" -body {
+    set tree [Tree new {value 1 left {value 2 right {value 3}} right {value 4}}]
+    set z [Zipper new $tree]
+    set z [[[[$z left] right] up] up]
+    $z value
+} -returnCodes ok -result 1
 
-#############################################################
-# Some procs that are handy for Tcl test custom matching.
-# ref http://www.tcl-lang.org/man/tcl8.6/TclCmd/tcltest.htm#M20
+skip zipper-8
+test zipper-8 "set_value" -body {
+    set tree [Tree new {value 1 left {value 2 right {value 3}} right {value 4}}]
+    set z [Zipper new $tree]
+    set z [$z left]
+    $z setValue 5
+    [$z tree] toDict
+} -returnCodes ok -result {value 1 left {value 5 right {value 3}} right {value 4}}
+
+skip zipper-9
+test zipper-9 "set_value after traversing up" -body {
+    set tree [Tree new {value 1 left {value 2 right {value 3}} right {value 4}}]
+    set z [Zipper new $tree]
+    set z [[[$z left] right] up]
+    $z setValue 5
+    [$z tree] toDict
+} -returnCodes ok -result {value 1 left {value 5 right {value 3}} right {value 4}}
+
+skip zipper-10
+test zipper-10 "set_left with leaf" -body {
+    set tree [Tree new {value 1 left {value 2 right {value 3}} right {value 4}}]
+    set z [Zipper new $tree]
+    set z [$z left]
+    $z setLeft [Tree new {value 5}]
+    [$z tree] toDict
+} -returnCodes ok -result {value 1 left {value 2 left {value 5} right {value 3}} right {value 4}}
+
+skip zipper-11
+test zipper-11 "set_right with null" -body {
+    set tree [Tree new {value 1 left {value 2 right {value 3}} right {value 4}}]
+    set z [Zipper new $tree]
+    set z [$z left]
+    $z setRight ""
+    [$z tree] toDict
+} -returnCodes ok -result {value 1 left {value 2} right {value 4}}
+
+skip zipper-12
+test zipper-12 "set_right with subtree" -body {
+    set tree [Tree new {value 1 left {value 2 right {value 3}} right {value 4}}]
+    set z [Zipper new $tree]
+    $z setRight [Tree new {value 6 left {value 7} right {value 8}}]
+    [$z tree] toDict
+} -returnCodes ok -result {value 1 left {value 2 right {value 3}} right {value 6 left {value 7} right {value 8}}}
+
+skip zipper-13
+test zipper-13 "set_value on deep focus" -body {
+    set tree [Tree new {value 1 left {value 2 right {value 3}} right {value 4}}]
+    set z [Zipper new $tree]
+    set z [[$z left] right]
+    $z setValue 5
+    [$z tree] toDict
+} -returnCodes ok -result {value 1 left {value 2 right {value 5}} right {value 4}}
+
+skip zipper-14
+test zipper-14 "different paths to same zipper" -body {
+    set input {value 1 left {value 2 right {value 3}} right {value 4}}
+    set zipper1 [Zipper new [Tree new $input]]
+    set zipper1 [[[$zipper1 left] up] right]
+
+    set zipper2 [Zipper new [Tree new $input]]
+    set zipper2 [$zipper2 right]
+
+    $zipper1 equals $zipper2
+} -returnCodes ok -match boolean -result true
 
 
-# Since Tcl boolean values can be more than just 0/1...
-#   set a yes; set b true
-#   expr  {$a == $b}     ;# => 0
-#   expr  {$a && $b}     ;# => 1
-#   expr  {!!$a == !!$b} ;# => 1
-#   set a off; set b no
-#   expr {$a == $b}      ;# => 0
-#   expr {$a && $b}      ;# => 0
-#   expr {!!$a == !!$b}  ;# => 1
-#
-proc booleanMatch {expected actual} {
-    return [expr {
-        [string is boolean -strict $expected] &&
-        [string is boolean -strict $actual] &&
-        !!$expected == !!$actual
-    }]
-}
-customMatch boolean booleanMatch
+cleanupTests

@@ -1,49 +1,118 @@
-#############################################################
-# Override some tcltest procs with additional functionality
+#!/usr/bin/env tclsh
 
-# Allow an environment variable to override `skip`
-proc skip {patternList} {
-    if { [info exists ::env(RUN_ALL)]
-         && [string is boolean -strict $::env(RUN_ALL)]
-         && $::env(RUN_ALL)
-    } then return else {
-        uplevel 1 [list ::tcltest::skip $patternList]
-    }
+package require Thread
+package require tcltest
+namespace import ::tcltest::*
+source testHelpers.tcl
+
+# configure -verbose {body error usec}
+
+############################################################
+source "paasio.tcl"
+
+test paasio-1 "read a file" -body {
+    set ioMeter [PlatformIO new]
+    set handle [$ioMeter open "testHelpers.tcl" r]
+
+    set contents [::read $handle]
+    ::chan close $handle
+
+    $ioMeter stats
+} -returnCodes ok -match dictionary -result {
+    reads 1 readBytes 1530 writes 0 writeBytes 0
 }
 
-# Exit non-zero if any tests fail.
-# The cleanupTests resets the numTests array, so capture it first.
-proc cleanupTests {} {
-    set failed [expr {$::tcltest::numTests(Failed) > 0}]
-    uplevel 1 ::tcltest::cleanupTests
-    if {$failed} then {exit 1}
+skip paasio-2
+test paasio-2 "write a file" -setup {
+    set filename [file tempfile]
+} -cleanup {
+    file delete $filename
+} -body {
+    set ioMeter [PlatformIO new]
+    set handle [$ioMeter open $filename w]
+
+    # so we don't have to guess how much Tcl buffers before flushing
+    ::chan configure $handle -buffering line
+
+    # perform 2 writes
+    ::chan puts $handle "123456789"    ;# `puts` adds a newline
+    ::chan puts $handle "1234567890123456789"
+    ::chan close $handle
+
+    $ioMeter stats
+} -returnCodes ok -match dictionary -result {
+    reads 0 readBytes 0 writes 2 writeBytes 30
 }
 
-# Compare two dictionaries for the same keys and same values
-proc dictionaryMatch {expected actual} {
-    if {[dict size $expected] != [dict size $actual]} {
-        return false
-    }
-    dict for {key value} $expected {
-        if {![dict exists $actual $key]} {
-            return false
-        }
-        set actualValue [dict get $actual $key]
+skip paasio-3
+test paasio-3 "write and read a file" -setup {
+    set filename [file tempfile]
+} -cleanup {
+    file delete $filename
+} -body {
+    set ioMeter [PlatformIO new]
+    set handle [$ioMeter open $filename w]
 
-        # if this value is a dict then recurse, 
-        # else just check for string equality
-        if {[string is list -strict $value] &&
-            [llength $value] > 1 && 
-            [llength $value] % 2 == 0
-        } {
-            set procname [lindex [info level 0] 0]
-            if {![$procname $value $actualValue]} {
-                return false
-            }
-        } elseif {$actualValue ne $value} {
-            return false
-        }
+    ::chan configure $handle -buffering line
+
+    # perform 2 writes
+    ::chan puts $handle "123456789"    ;# `puts` adds a newline
+    ::chan puts $handle "1234567890123456789"
+    ::chan close $handle
+
+    # and 2 reads
+    set handle [$ioMeter open $filename r]
+    while {true} {
+        set line [::chan gets $handle line]
+        # ... do stuff with the line
+        if {[::chan eof $handle]} {break}
     }
-    return true
+    ::chan close $handle
+
+    # I don't know how many read operations Tcl actually performs
+    set stats [$ioMeter stats]
+    dict remove $stats reads
+
+} -returnCodes ok -match dictionary -result {
+    readBytes 30 writes 2 writeBytes 30
 }
-customMatch dictionary dictionaryMatch
+
+# create an echo server for the tests to interact with
+set serverThread [thread::create]
+thread::send -async $serverThread {
+    set s [socket -server handleConnection 0]
+    set env(ECHOPORT) [lindex [chan configure $s -sockname] 2]
+
+    proc handleConnection {channel clientaddr clientport} {
+        set input [::chan gets $channel]
+        # respond with the input doubled
+        ::chan puts $channel "$input$input"
+        ::chan close $channel
+    }
+
+    vwait forever
+}
+after 100
+
+skip paasio-4
+test paasio-4 "sockets" -body {
+    set ioMeter [PlatformIO new]
+    set handle [$ioMeter socket localhost $env(ECHOPORT)]
+
+    ::chan configure $handle -buffering line
+
+    ::chan puts $handle "hello"
+    set answer [::chan gets $handle]
+    ::chan close $handle
+
+    $ioMeter stats
+
+    # Note that Tcl's socket IO uses CRLF line endings.
+    # We can expect the output will be "hello\r\n"
+    # and the input will be "hellohello\r\n"
+
+} -returnCodes ok -match dictionary -result {
+    reads 1 readBytes 12 writes 1 writeBytes 7
+}
+
+cleanupTests
