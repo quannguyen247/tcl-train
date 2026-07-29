@@ -1,10 +1,3 @@
-# ==============================================================================
-# EXERCISM TCL PRACTICE: DND-CHARACTER
-# ==============================================================================
-
-# YOUR SOLUTION CODE BELOW
-# ==============================================================================
-
 namespace eval dnd {
     namespace export modifier ability character
     namespace ensemble create

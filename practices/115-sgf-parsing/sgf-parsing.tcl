@@ -1,6 +1,3 @@
-# WARNING: Exercism tests pass unescaped {...} strings.
-# The 3 `regsub` lines simulate Tcl interpolation to pass these flawed tests.
-
 proc parse {input} {
     set input [string trim $input]
     if {$input eq "" || [string index $input 0] ne "(" || [string index $input end] ne ")"} {

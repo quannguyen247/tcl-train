@@ -1,60 +1,76 @@
-# Tcl / Tk Learning & EDA / DFT Scripting Training Repository 🚀
+# Tcl for EDA, DFT, and Problem Solving
 
-Welcome to **tcl-train**, a comprehensive Tcl/Tk training repository compiling fundamental-to-advanced knowledge, lessons, practice exercises, and real-world Electronic Design Automation (EDA) & Design for Testability (DFT) scripting workflows.
+This repository is an English-language Tcl learning path that combines:
 
-## 📌 Overview & Purpose
+- focused language lessons in [`courses/`](courses/);
+- 135 active Exercism Tcl exercises in [`practices/`](practices/);
+- Vivado-oriented automation examples in [`vivado/`](vivado/);
+- a larger applied project in [`capstone/`](capstone/).
 
-This repository was created as a personal knowledge base and reference guide, aimed at mastering Tcl scripting for IC Design, RTL Development, DFT (Design for Testability), and Physical Design (PD) automation.
+The material emphasizes readable, idiomatic Tcl that transfers to ASIC/FPGA,
+EDA, physical-design, and DFT automation.
 
-### Key Highlights:
-- **Comprehensive Lessons**: Structured tutorials covering basic syntax, control flows, procedures, data structures (Lists, Dicts, Arrays), string manipulation, and TclOO object-oriented programming.
-- **Exercism Practice Track**: Includes 140+ hands-on Tcl exercises sourced from the official [Exercism Tcl Track](https://exercism.org/tracks/tcl) to build syntax muscle memory and algorithmic problem-solving skills.
-- **EDA & DFT Real-World Workflows**: Practical examples and scripting techniques tailored for semiconductor design workflows (Synopsys, Cadence, Siemens Tessent).
-- **AI-Assisted Creation**: Built, curated, and structured with the assistance of AI pair-programming tools to ensure high-quality explanations, complete solutions, and automated test runners.
-
----
-
-## 🌐 Dual-Language Structure (`en/` & `vi/`)
-
-To support both local and international learners, the entire repository is organized into dual-language tracks:
+## Repository layout
 
 ```text
 tcl-train/
-├── en/                         # English Version
-│   ├── courses/                # Core Tcl Lessons & Tutorial Modules
-│   └── practices/              # Exercism Practice Exercises (001 - 140)
-│
-├── vi/                         # Vietnamese Version (Tiếng Việt)
-│   ├── courses/                # Bài học & Kiến thức Tcl tiếng Việt
-│   └── practices/              # Bài tập thực hành Exercism (001 - 140)
-│
-└── scripts/                    # Helper Scripts & Master Test Runners
+├── README.md
+├── NOTE.md
+├── roadmap.md
+├── run_all_tests.py
+├── courses/
+├── practices/
+├── vivado/
+└── capstone/
 ```
 
-- 🇬🇧 **[English Track (`./en/`)](./en/)**: Fully detailed explanations, courses, and exercise test runners in English.
-- 🇻🇳 **[Vietnamese Track (`./vi/`)](./vi/)**: Full curriculum translated and formatted for Vietnamese students & engineers.
+## Practice exercises
 
----
+The collection follows the 135 active practice exercises in the Exercism Tcl
+track as checked on August 11, 2026. Exercise tests and instructions were
+refreshed from `exercism/tcl` commit
+`c42295e0b80f25ec0241d0d49756544c89e3f828`.
 
-## 🧪 Running Tests
+Five exercises present in the older 140-exercise snapshot are now deprecated
+and are intentionally excluded:
 
-Each exercise includes a dedicated `.test.tcl` file using Tcl's built-in `tcltest` framework.
+- `accumulate`
+- `beer-song`
+- `diffie-hellman`
+- `minesweeper`
+- `scale-generator`
 
-You can run automated master test runners using Python:
+Exercism can update the track later, so 135 is a verified snapshot rather than
+a permanent platform guarantee.
 
-```bash
-# Run all exercise test suites
-python en/practices/run_all_tests.py
+Each exercise directory contains its instructions, solution, test suite, and
+the upstream test helper required to enable the full test set.
+
+## Run the complete practice suite
+
+Install Tcl 8.6 or newer and ensure `tclsh` is available in `PATH`, then run:
+
+```powershell
+python run_all_tests.py
 ```
 
----
+The runner enables every Exercism test case and returns a non-zero exit code
+when any suite fails, errors, times out, or remains unimplemented.
 
-## 👨‍💻 Author & Acknowledgments
+## Coding conventions
 
-- **Author**: Nguyễn Đông Quân ([@quangnguyen247](https://github.com/quannguyen247)) - IC Design Talent Program at UIT-VNUHCM.
-- **Exercises Source**: Practice problems sourced from the [Exercism Tcl Track](https://exercism.org/tracks/tcl).
-- **AI Collaboration**: Developed and refined with the help of AI pair-programming assistants.
+- Use four spaces for indentation.
+- Brace expressions passed to `if`, `while`, and `expr`.
+- Prefer Tcl list and dictionary commands over string-shaped data handling.
+- Keep procedures small and explicit about mutation.
+- Comment decisions and edge cases, not obvious syntax.
+- Preserve an exercise's required public API.
 
----
+## Attribution
 
-*Feel free to star ⭐️ the repository and use it as a reference for your Tcl and EDA/DFT learning journey!*
+The practice statements and tests come from the open-source
+[Exercism Tcl track](https://github.com/exercism/tcl). Solutions in this
+repository are the author's work, including iterations backed up through the
+Exercism GitHub Syncer.
+
+Maintained by [quannguyen247](https://github.com/quannguyen247).

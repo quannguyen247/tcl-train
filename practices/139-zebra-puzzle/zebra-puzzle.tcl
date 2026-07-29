@@ -1,7 +1,3 @@
-# ==============================================================================
-# EXERCISM TCL PRACTICE: ZEBRA-PUZZLE
-# ==============================================================================
-
 if {[file exists lib]} {
     lappend auto_path lib
     catch {package require permutations}
