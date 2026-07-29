@@ -1,36 +1,41 @@
 proc sharedBirthday {birthdays} {
-    array set seen {}
-    foreach b $birthdays {
-        set md [string range $b 5 9]
-        if {[info exists seen($md)]} {
+    set seen {}
+
+    foreach birthday $birthdays {
+        set monthDay [string range $birthday 5 9]
+
+        if {[dict exists $seen $monthDay]} {
             return true
         }
-        set seen($md) 1
+
+        dict set seen $monthDay 1
     }
+
     return false
 }
 
 proc randomBirthdates {count} {
-    set res {}
-    set days_in_month {31 28 31 30 31 30 31 31 30 31 30 31}
+    set birthdates {}
+
     for {set i 0} {$i < $count} {incr i} {
-        set month [expr {int(rand() * 12) + 1}]
-        set max_day [lindex $days_in_month [expr {$month - 1}]]
-        set day [expr {int(rand() * $max_day) + 1}]
-        set year [expr {int(rand() * 50) + 1970}]
-        lappend res [format "%04d-%02d-%02d" $year $month $day]
+        set year [expr {2001 + int(rand() * 3)}]
+        set day [expr {int(rand() * 365) + 1}]
+
+        lappend birthdates [clock format \
+            [clock scan "$year-$day" -format {%Y-%j}] -format %Y-%m-%d]
     }
-    return $res
+
+    return $birthdates
 }
 
 proc estimatedProbabilityOfSharedBirthday {size} {
-    set trials 1000
-    set shared 0
-    for {set i 0} {$i < $trials} {incr i} {
-        set dates [randomBirthdates $size]
-        if {[sharedBirthday $dates]} {
-            incr shared
-        }
+    set allDifferent 1.0
+
+    for {set i 0} {$i < $size} {incr i} {
+        set allDifferent [expr {
+            $allDifferent * (365.0 - $i) / 365.0
+        }]
     }
-    return [expr {double($shared) / $trials}]
+
+    return [expr {100 * (1 - $allDifferent)}]
 }
