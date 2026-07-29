@@ -1,34 +1,28 @@
-proc encode {phrase} {
-    set clean [regsub -all {[^a-zA-Z0-9]} $phrase ""]
-    set clean [string tolower $clean]
-    set cipher ""
-    set count 0
-    foreach char [split $clean ""] {
-        if {[string is alpha $char]} {
-            set c [format %c [expr {219 - [scan $char %c]}]]
-        } else {
-            set c $char
-        }
-        if {$count > 0 && $count % 5 == 0} {
-            append cipher " "
-        }
-        append cipher $c
-        incr count
-    }
-    return $cipher
-}
+namespace eval atbash {
+    namespace export encode decode
+    namespace ensemble create
 
-proc decode {phrase} {
-    set clean [regsub -all {[^a-zA-Z0-9]} $phrase ""]
-    set clean [string tolower $clean]
-    set plain ""
-    foreach char [split $clean ""] {
-        if {[string is alpha $char]} {
-            set c [format %c [expr {219 - [scan $char %c]}]]
-        } else {
-            set c $char
+    proc encode {phrase} {
+        set result ""
+        foreach char [split [string tolower $phrase] ""] {
+            if {[string is alpha $char]} {
+                append result [format %c [expr {219 - [scan $char %c]}]]
+            } elseif {[string is digit $char]} {
+                append result $char
+            }
         }
-        append plain $c
+        return [join [regexp -all -inline {.{1,5}} $result] " "]
     }
-    return $plain
+
+    proc decode {cipher} {
+        set result ""
+        foreach char [split [string tolower $cipher] ""] {
+            if {[string is alpha $char]} {
+                append result [format %c [expr {219 - [scan $char %c]}]]
+            } elseif {[string is digit $char]} {
+                append result $char
+            }
+        }
+        return $result
+    }
 }
