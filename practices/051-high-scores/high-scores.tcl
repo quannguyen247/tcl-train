@@ -1,23 +1,27 @@
 oo::class create HighScores {
+    variable history
+
+    constructor {} {
+        set history {}
+    }
 
     method addScores {args} {
-        return {}
+        lappend history {*}$args
     }
 
     method scores {} {
-        return {}
+        return $history
     }
 
     method latest {} {
-        return {}
+        return [lindex $history end]
     }
-    
+
     method personalBest {} {
-        return {}
+        return [lindex [lsort -integer $history] end]
     }
 
     method topThree {} {
-        return {}
+        return [lrange [lsort -integer -decreasing $history] 0 2]
     }
 }
-
