@@ -108,10 +108,51 @@
 # [papyr]: https://papyr.com/hypertextbooks/grammar/ph_noun.htm
 
 # ==============================================================================
-# YOUR SOLUTION CODE BELOW
+# ALGORITHM & TCL SYNTAX NOTES
+# ==============================================================================
+# 1. SENTENCE PATTERN & LIST MANIPULATION:
+#    - Each clause is structured as "the [noun] [verb]" (e.g. "the malt that lay in").
+#    - Slice sublist from 0 to i-1 using `[lrange $s 0 $i-1]`.
+#    - Reverse the sublist using `lreverse` to match recursive embedding order.
+#
+# 2. TCL MINIMALIST TRICKS:
+#    - `lappend res ...`: Automatically initializes `res` to empty list if undefined.
+#    - `join [lreverse ...]`: Defaults to single space `" "` separation if 2nd arg omitted.
+#    - `join $res \n`: Last command result in proc automatically acts as return value.
 # ==============================================================================
 
 proc recite {from to} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    set s {
+        "the house that Jack built."
+        "the malt that lay in"
+        "the rat that ate"
+        "the cat that killed"
+        "the dog that worried"
+        "the cow with the crumpled horn that tossed"
+        "the maiden all forlorn that milked"
+        "the man all tattered and torn that kissed"
+        "the priest all shaven and shorn that married"
+        "the rooster that crowed in the morn that woke"
+        "the farmer sowing his corn that kept"
+        "the horse and the hound and the horn that belonged to"
+    }
+
+    # Iterate from verse $from to $to
+    for {set i $from} {$i <= $to} {incr i} {
+        # [lrange $s 0 $i-1]: Slice list from 0 to i-1
+        # [lreverse ...]: Reverse clause list
+        # [join ...]: Join clauses with default space
+        # lappend auto-initializes res
+        lappend res "This is [join [lreverse [lrange $s 0 $i-1]]]"
+    }
+
+    # Join verses with newline
+    return [join $res "\n"]
 }
+
+
+
+
+
+
 

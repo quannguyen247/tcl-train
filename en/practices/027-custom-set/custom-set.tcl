@@ -1,15 +1,7 @@
 # ==============================================================================
 # EXERCISM TCL PRACTICE: CUSTOM-SET
 # ==============================================================================
-# # Instructions
-#
-# Create a custom set type.
-#
-# Sometimes it is necessary to define a custom data structure of some type, like a set.
-# In this exercise you will define your own set.
-# How it works internally doesn't matter, as long as it behaves like a set of unique elements.
 
-# ==============================================================================
 # YOUR SOLUTION CODE BELOW
 # ==============================================================================
 
@@ -33,8 +25,20 @@ oo::class create CustomSet {
         return [expr {[llength $elems] == 0}]
     }
 
+    method empty {} {
+        return [my empty?]
+    }
+
+    method isEmpty {} {
+        return [my empty?]
+    }
+
     method contains? {element} {
         return [expr {[lsearch -exact $elems $element] != -1}]
+    }
+
+    method contains {element} {
+        return [my contains? $element]
     }
 
     method subset? {otherSet} {
@@ -46,6 +50,14 @@ oo::class create CustomSet {
         return true
     }
 
+    method subset {otherSet} {
+        return [my subset? $otherSet]
+    }
+
+    method subsetOf {otherSet} {
+        return [my subset? $otherSet]
+    }
+
     method disjoint? {otherSet} {
         foreach e $elems {
             if {[$otherSet contains? $e]} {
@@ -55,8 +67,16 @@ oo::class create CustomSet {
         return true
     }
 
+    method disjoint {otherSet} {
+        return [my disjoint? $otherSet]
+    }
+
     method equals? {otherSet} {
         return [expr {[my subset? $otherSet] && [$otherSet subset? [self]]}]
+    }
+
+    method equals {otherSet} {
+        return [my equals? $otherSet]
     }
 
     method add {element} {
@@ -104,3 +124,5 @@ oo::class create CustomSet {
         return [lsort -integer $elems]
     }
 }
+
+interp alias {} Set {} CustomSet
