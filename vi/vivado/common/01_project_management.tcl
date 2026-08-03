@@ -1,59 +1,43 @@
-# ==============================================================================
-# BÀI HỌC VIVADO COMMON 01: QUẢN LÝ PROJECT THỰC CHIẾN BẰNG TCL (PROJECT FLOW)
-# ==============================================================================
-# Trong môi trường doanh nghiệp (Enterprise), việc mở giao diện GUI bấm nút bằng chuột
-# rất rủi ro và không thể tự động hóa. Tất cả mọi thứ đều được chạy bằng Tcl Script!
-# ==============================================================================
+# Bài học Vivado Tcl: 01_project_management
+# -------------------------------------------------------------------------
+# Mô tả: Các lệnh thiết yếu để tạo, tải và quản lý dự án Vivado.
+# -------------------------------------------------------------------------
 
-# 1. TẠO HOẶC MỞ PROJECT (CREATE / OPEN PROJECT)
-# ------------------------------------------------------------------------------
-set proj_name "my_fpga_project"
-set proj_dir "./build_output"
-set target_part "xc7z020clg400-1" ;# Zynq-7000 FPGA Part Number
+# 1. create_project
+# Tạo một dự án Vivado mới.
+# -force ghi đè nếu dự án đã tồn tại.
+# -part chỉ định mã linh kiện FPGA.
+puts "Đang tạo dự án..."
+# create_project -force my_project ./my_project_dir -part xc7a35tcpg236-1
 
-# Kiểm tra nếu project chưa tồn tại thì tạo mới, nếu có rồi thì reset/mở lại
-if {[file exists $proj_dir]} {
-    puts "--> Thư mục build đã tồn tại, đang dọn dẹp..."
-    file delete -force $proj_dir
-}
+# 2. current_project
+# Trả về dự án đang hoạt động hiện tại.
+# set proj [current_project]
+# puts "Dự án hiện tại: $proj"
 
-puts "--> Đang khởi tạo Vivado Project mới..."
-create_project $proj_name $proj_dir -part $target_part -force
+# 3. set_property / get_property
+# Dùng để thiết lập và lấy các thuộc tính của dự án hoặc bất kỳ đối tượng Vivado nào.
+# set_property target_language VHDL [current_project]
+# set lang [get_property target_language [current_project]]
+# puts "Ngôn ngữ đích được thiết lập là: $lang"
 
-# Thiết lập ngôn ngữ mặc định (Verilog / SystemVerilog / VHDL)
-set_property target_language Verilog [current_project]
+# 4. add_files / import_files / remove_files
+# Thêm file mã nguồn vào dự án.
+# add_files chỉ liên kết file, trong khi import_files copy file vào thư mục dự án.
+# add_files ./src/top.v
+# import_files ./src/top.v
+# remove_files ./src/top.v
 
-# 2. THÊM SOURCE CODE VÀ CONSTRAINTS (ADD FILES)
-# ------------------------------------------------------------------------------
-puts "--> Đang add các file RTL và Constraints..."
+# 5. set_part / get_parts
+# Dùng để truy vấn các linh kiện có sẵn hoặc đổi linh kiện cho dự án hiện tại.
+# get_parts *xc7a35t* 
+# set_part xc7z020clg400-1
 
-# Thêm file Verilog/SystemVerilog
-# add_files [glob ./src/*.v]
-# add_files [glob ./src/*.sv]
+# 6. archive_project
+# Nén toàn bộ dự án thành file zip để chia sẻ hoặc sao lưu.
+# archive_project ./my_project_archive.zip -force
 
-# Thêm file Ràng buộc thời gian & chân cắm (XDC File)
-# add_files -fileset constrs_1 ./constraints/top_pins.xdc
-
-# 3. CHẠY TỔNG HỢP NGHỆ THUẬT (SYNTHESIS)
-# ------------------------------------------------------------------------------
-puts "--> Bắt đầu chạy Tổng hợp thiết kế (Synthesis)..."
-launch_runs synth_1 -jobs 4
-
-# Bắt buộc phải dùng wait_on_run để script dừng lại đợi Synthesis hoàn thành trước khi sang bước sau
-wait_on_run synth_1
-
-if {[get_property PROGRESS [get_runs synth_1]] != "100%"} {
-    error "ERROR: Synthesis thất bại! Vui lòng kiểm tra log synth_1."
-}
-
-# 4. CHẠY THI CÔNG MẠCH (IMPLEMENTATION - PLACE & ROUTE)
-# ------------------------------------------------------------------------------
-puts "--> Bắt đầu chạy Implementation (Place & Route)..."
-launch_runs impl_1 -to_step write_bitstream -jobs 4
-wait_on_run impl_1
-
-if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {
-    error "ERROR: Implementation thất bại! Vui lòng kiểm tra log impl_1."
-}
-
-puts "--> HOÀN THÀNH LUỒNG TỰ ĐỘNG HÓA! Bitstream đã được tạo thành công."
+# 7. close_project / open_project
+# Đóng dự án hiện tại trên RAM, và mở một dự án đã có.
+# close_project
+# open_project ./my_project_dir/my_project.xpr

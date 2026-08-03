@@ -1,59 +1,43 @@
-# ==============================================================================
-# VIVADO COMMON LESSON 01: ENTERPRISE PROJECT MANAGEMENT VIA TCL FLOW
-# ==============================================================================
-# In corporate environments, using the Vivado GUI to click buttons is error-prone
-# and impossible to automate. Everything is executed using Tcl scripts!
-# ==============================================================================
+# Vivado Tcl Lesson: 01_project_management
+# -------------------------------------------------------------------------
+# Description: Essential commands for project creation, loading, and management.
+# -------------------------------------------------------------------------
 
-# 1. CREATE OR OPEN PROJECT
-# ------------------------------------------------------------------------------
-set proj_name "my_fpga_project"
-set proj_dir "./build_output"
-set target_part "xc7z020clg400-1" ;# Zynq-7000 FPGA Part Number
+# 1. create_project
+# Creates a new Vivado project.
+# -force overwrites the project if it already exists.
+# -part specifies the FPGA part number.
+puts "Creating project..."
+# create_project -force my_project ./my_project_dir -part xc7a35tcpg236-1
 
-# Check if build directory exists, clean up if needed
-if {[file exists $proj_dir]} {
-    puts "--> Build directory exists, cleaning up..."
-    file delete -force $proj_dir
-}
+# 2. current_project
+# Returns the currently active project.
+# set proj [current_project]
+# puts "Active project: $proj"
 
-puts "--> Initializing new Vivado Project..."
-create_project $proj_name $proj_dir -part $target_part -force
+# 3. set_property / get_property
+# Used to set and get properties on the project or any other Vivado object.
+# set_property target_language VHDL [current_project]
+# set lang [get_property target_language [current_project]]
+# puts "Target language is set to: $lang"
 
-# Set target language (Verilog / SystemVerilog / VHDL)
-set_property target_language Verilog [current_project]
+# 4. add_files / import_files / remove_files
+# Adding source files to the project.
+# add_files links the files, while import_files copies them into the project directory.
+# add_files ./src/top.v
+# import_files ./src/top.v
+# remove_files ./src/top.v
 
-# 2. ADD SOURCE CODE AND CONSTRAINTS
-# ------------------------------------------------------------------------------
-puts "--> Adding RTL source files and timing constraints..."
+# 5. set_part / get_parts
+# Used to query available parts or change the current project's part.
+# get_parts *xc7a35t* 
+# set_part xc7z020clg400-1
 
-# Add Verilog/SystemVerilog files
-# add_files [glob ./src/*.v]
-# add_files [glob ./src/*.sv]
+# 6. archive_project
+# Packages the entire project into a zip file for sharing or version control backup.
+# archive_project ./my_project_archive.zip -force
 
-# Add Timing and Pin Constraints (XDC File)
-# add_files -fileset constrs_1 ./constraints/top_pins.xdc
-
-# 3. RUN SYNTHESIS
-# ------------------------------------------------------------------------------
-puts "--> Launching Design Synthesis..."
-launch_runs synth_1 -jobs 4
-
-# Mandatory: wait_on_run blocks the script until Synthesis finishes
-wait_on_run synth_1
-
-if {[get_property PROGRESS [get_runs synth_1]] != "100%"} {
-    error "ERROR: Synthesis failed! Please check synth_1 log."
-}
-
-# 4. RUN IMPLEMENTATION (PLACE & ROUTE)
-# ------------------------------------------------------------------------------
-puts "--> Launching Implementation (Place & Route)..."
-launch_runs impl_1 -to_step write_bitstream -jobs 4
-wait_on_run impl_1
-
-if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {
-    error "ERROR: Implementation failed! Please check impl_1 log."
-}
-
-puts "--> AUTOMATION FLOW COMPLETED! Bitstream generated successfully."
+# 7. close_project / open_project
+# Closes the current project in memory, and opens an existing one.
+# close_project
+# open_project ./my_project_dir/my_project.xpr
