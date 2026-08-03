@@ -14,25 +14,39 @@
 # ==============================================================================
 
 oo::class create Clock {
+    variable minutes
 
-    constructor {hour minute} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+    constructor {h m} {
+        set total [expr {($h * 60 + $m) % 1440}]
+        if {$total < 0} {
+            set total [expr {$total + 1440}]
+        }
+        set minutes $total
+    }
+
+    method getMinutes {} {
+        return $minutes
     }
 
     method toString {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        set h [expr {$minutes / 60}]
+        set m [expr {$minutes % 60}]
+        return [format "%02d:%02d" $h $m]
     }
 
-    method add {minutes} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+    method add {m} {
+        return [Clock new 0 [expr {$minutes + $m}]]
     }
 
-    method subtract {minutes} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+    method subtract {m} {
+        return [Clock new 0 [expr {$minutes - $m}]]
     }
 
     method equals {other} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        return [expr {$minutes == [$other getMinutes]}]
+    }
+
+    method == {other} {
+        return [my equals $other]
     }
 }
-
