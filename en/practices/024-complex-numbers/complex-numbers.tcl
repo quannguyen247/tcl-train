@@ -107,48 +107,121 @@
 # ==============================================================================
 
 oo::class create ComplexNumber {
-    constructor {real imag} {
-        throw {NOT_IMPLEMENTED} "Implement this class."
+    variable r
+    variable i
+
+    constructor {real_part imag_part} {
+        set r [expr {double($real_part)}]
+        set i [expr {double($imag_part)}]
     }
 
-    method real {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
-    }
-
-    method imag {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
-    }
-
-    method toList {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
-    }
+    method real {} { return $r }
+    method imag {} { return $i }
+    method toList {} { return [list $r $i] }
 
     method add {other} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        if {[info object is object $other]} {
+            set ar [$other real]
+            set ai [$other imag]
+        } else {
+            set ar [expr {double($other)}]
+            set ai 0.0
+        }
+        return [ComplexNumber new [expr {$r + $ar}] [expr {$i + $ai}]]
     }
 
     method sub {other} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        if {[info object is object $other]} {
+            set ar [$other real]
+            set ai [$other imag]
+        } else {
+            set ar [expr {double($other)}]
+            set ai 0.0
+        }
+        return [ComplexNumber new [expr {$r - $ar}] [expr {$i - $ai}]]
     }
 
     method mul {other} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        if {[info object is object $other]} {
+            set ar [$other real]
+            set ai [$other imag]
+            set nr [expr {$r * $ar - $i * $ai}]
+            set ni [expr {$r * $ai + $i * $ar}]
+        } else {
+            set o [expr {double($other)}]
+            set nr [expr {$r * $o}]
+            set ni [expr {$i * $o}]
+        }
+        return [ComplexNumber new $nr $ni]
     }
 
     method div {other} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        if {[info object is object $other]} {
+            set ar [$other real]
+            set ai [$other imag]
+            set denom [expr {$ar * $ar + $ai * $ai}]
+            set nr [expr {($r * $ar + $i * $ai) / $denom}]
+            set ni [expr {($i * $ar - $r * $ai) / $denom}]
+        } else {
+            set o [expr {double($other)}]
+            set nr [expr {$r / $o}]
+            set ni [expr {$i / $o}]
+        }
+        return [ComplexNumber new $nr $ni]
     }
 
     method abs {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        return [expr {hypot($r, $i)}]
     }
 
     method conj {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        return [ComplexNumber new $r [expr {-$i}]]
     }
 
     method exp {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        set er [expr {exp($r)}]
+        set nr [expr {$er * cos($i)}]
+        set ni [expr {$er * sin($i)}]
+        return [ComplexNumber new $nr $ni]
     }
 }
 
+proc tcl::mathfunc::cr_add {a b} {
+    if {[info object is object $a] && [info object is object $b]} {
+        return [$a add $b]
+    } elseif {[info object is object $a]} {
+        return [$a add $b]
+    } else {
+        return [[ComplexNumber new $a 0] add $b]
+    }
+}
+
+proc tcl::mathfunc::cr_sub {a b} {
+    if {[info object is object $a] && [info object is object $b]} {
+        return [$a sub $b]
+    } elseif {[info object is object $a]} {
+        return [$a sub $b]
+    } else {
+        return [[ComplexNumber new $a 0] sub $b]
+    }
+}
+
+proc tcl::mathfunc::cr_mul {a b} {
+    if {[info object is object $a] && [info object is object $b]} {
+        return [$a mul $b]
+    } elseif {[info object is object $a]} {
+        return [$a mul $b]
+    } else {
+        return [[ComplexNumber new $a 0] mul $b]
+    }
+}
+
+proc tcl::mathfunc::cr_div {a b} {
+    if {[info object is object $a] && [info object is object $b]} {
+        return [$a div $b]
+    } elseif {[info object is object $a]} {
+        return [$a div $b]
+    } else {
+        return [[ComplexNumber new $a 0] div $b]
+    }
+}
