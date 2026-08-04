@@ -1,4 +1,9 @@
 proc isPangram {text} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    set text [string tolower $text]
+    foreach c [split "abcdefghijklmnopqrstuvwxyz" ""] {
+        if {[string first $c $text] == -1} {
+            return false
+        }
+    }
+    return true
 }
-
