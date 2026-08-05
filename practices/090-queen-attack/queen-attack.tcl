@@ -1,18 +1,21 @@
 oo::class create Queen {
-    constructor {row row} {
-        throw {NOT_IMPLEMENTED} "Implement this class."
+    variable r c
+
+    constructor {row col} {
+        if {$row < 0} { return -code error "row not positive" }
+        if {$row > 7} { return -code error "row not on board" }
+        if {$col < 0} { return -code error "column not positive" }
+        if {$col > 7} { return -code error "column not on board" }
+        set r $row
+        set c $col
     }
 
-    method row {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
-    }
-
-    method col {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
-    }
+    method r {} { return $r }
+    method c {} { return $c }
 
     method canAttack {other} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        set or [$other r]
+        set oc [$other c]
+        expr {$r == $or || $c == $oc || abs($r - $or) == abs($c - $oc)}
     }
 }
-
