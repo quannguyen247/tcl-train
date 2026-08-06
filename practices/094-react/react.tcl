@@ -1,46 +1,70 @@
 oo::class create InputCell {
-    constructor {value} {
-        throw {NOT_IMPLEMENTED} "Implement this class."
+    variable value
+
+    constructor {val} {
+        set value $val
     }
 
     method setValue {aValue} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        set value $aValue
     }
 
     method value {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        return $value
     }
 }
 
 oo::class create ComputeCell {
-    constructor {cells func} {
-        # For more details about what a "func" is,
-        # see the documentation for the [apply] command:
-        # https://tcl.tk/man/tcl8.6/TclCmd/apply.htm
+    variable dependentCells computeFunction
 
-        throw {NOT_IMPLEMENTED} "Implement this class."
+    constructor {cells func} {
+
+        set dependentCells $cells
+        set computeFunction $func
     }
 
     method value {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        apply $computeFunction [lmap cell $dependentCells {$cell value}]
     }
 
     method addCallback {func} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        Callback new $func [self]
     }
 
     method removeCallback {callback} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        $callback disable
     }
 }
 
 oo::class create Callback {
+    variable callbackFunc targetCell previousValue lastReportedValue isActive
+
     constructor {args} {
-        throw {NOT_IMPLEMENTED} "Implement this class."
+        lassign $args func cell
+        set callbackFunc $func
+        set targetCell $cell
+
+        set previousValue [apply $callbackFunc $targetCell]
+        set lastReportedValue {}
+
+        set isActive 1
     }
 
     method value {} {
-        throw {NOT_IMPLEMENTED} "Implement this method."
+        if {!$isActive} {
+            return $lastReportedValue
+        }
+
+        set currentValue [apply $callbackFunc $targetCell]
+
+        if {$currentValue ne $previousValue} {
+            set previousValue $currentValue
+            set lastReportedValue $currentValue
+            return $currentValue
+        }
+    }
+
+    method disable {} {
+        set isActive 0
     }
 }
-
