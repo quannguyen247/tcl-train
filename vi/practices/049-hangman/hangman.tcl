@@ -1,43 +1,74 @@
-# ==============================================================================
-# EXERCISM TCL PRACTICE: HANGMAN
-# ==============================================================================
-# # Instructions
-#
-# Implement the logic of the hangman game using functional reactive programming.
-#
-# [Hangman][hangman] is a simple word guessing game.
-#
-# [Functional Reactive Programming][frp] is a way to write interactive programs.
-# It differs from the usual perspective in that instead of saying "when the button is pressed increment the counter", you write "the value of the counter is the sum of the number of times the button is pressed."
-#
-# Implement the basic logic behind hangman using functional reactive programming.
-# You'll need to install an FRP library for this, this will be described in the language/track specific files of the exercise.
-#
-# [hangman]: https://en.wikipedia.org/wiki/Hangman_%28game%29
-# [frp]: https://en.wikipedia.org/wiki/Functional_reactive_programming
+set word [string tolower [lindex $argv 0]]
+set masked [string repeat "_" [string length $word]]
+set remaining 9
+set status "ongoing"
 
-# ==============================================================================
-# YOUR SOLUTION CODE BELOW
-# ==============================================================================
+# Đếm và mở khóa chữ đoán đúng
+proc processGuess {letter} {
+    global word masked remaining status
+    if {$status ne "ongoing"} return
 
-# This exercise is less structured than others
-throw {NOT_IMPLEMENTED} "Implement this program."
+    set letter [string tolower $letter]
+    set hit 0
+    set newMasked ""
 
-# For starting the server, use a proc like this:
-#
+    foreach c [split $word ""] m [split $masked ""] {
+        if {$c eq $letter && $m eq "_"} {
+            append newMasked [string toupper $c]
+            set hit 1
+        } else {
+            append newMasked $m
+        }
+    }
+    set masked $newMasked
+
+    if {!$hit} { incr remaining -1 }
+
+    if {[string first "_" $masked] == -1} {
+        set status "win"
+    } elseif {$remaining <= 0} {
+        set status "lose"
+    }
+}
+
+# Xử lý lệnh STATUS, GUESS, SHUTDOWN từ Client qua Socket
+proc handleClient {sock} {
+    global masked remaining status
+    if {[gets $sock line] < 0} { close $sock; return }
+
+    set cmd [string tolower [lindex $line 0]]
+    if {$cmd eq "guess"} {
+        processGuess [lindex $line 1]
+    } elseif {$cmd eq "shutdown"} {
+        close $sock
+        set ::done 1
+        return
+    }
+
+    # Trả về danh sách 3 phần tử [lượt_còn_lại chuỗi_che trạng_thái]
+    puts $sock [list $remaining $masked $status]
+    flush $sock
+
+    if {$status ne "ongoing"} {
+        close $sock
+        set ::done 1
+    }
+}
+
+proc newClient {sock addr port} {
+    fconfigure $sock -buffering line
+    fileevent $sock readable [list handleClient $sock]
+}
+
+# Khởi tạo Server TCP trên port 0
 proc startServer {} {
-    # use port 0 to allow Tcl to find an unused port
-    set s [socket -server yourCallbackProc 0]
-
-    # communicate the port number in use
+    set s [socket -server newClient 0]
     set sockInfo [chan configure $s -sockname]
     set ::env(HANGMAN_PORT) [lindex $sockInfo 2]
     puts "server started on port $::env(HANGMAN_PORT)"
 
-    # enter the event loop
-    vwait aGlobalVarname
+    vwait ::done
+    close $s
 }
 
-# get the word from the $argv list, then:
 startServer
-
