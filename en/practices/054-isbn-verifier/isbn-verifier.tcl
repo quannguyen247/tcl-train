@@ -45,19 +45,19 @@
 # [isbn-verification]: https://en.wikipedia.org/wiki/International_Standard_Book_Number
 
 # ==============================================================================
-# ALGORITHM & TCL SYNTAX NOTES
+# KỸ THUẬT & GIẢI THÍCH (ALGORITHM & TCL SYNTAX)
 # ==============================================================================
-# 1. STRING PREPROCESSING:
-#    - Strip all hyphens using `string map {- ""} $isbn`.
+# 1. TIỀN XỬ LÝ CHUỖI:
+#    - Dùng `string map {- ""} $isbn` để xóa bỏ toàn bộ dấu gạch ngang '-'.
 #
-# 2. PATTERN VALIDATION VIA REGEXP:
-#    - `{^[0-9]{9}[0-9X]$}`: Exactly 9 digits followed by 1 digit or 'X' at the end.
-#    - Returns `false` if format does not match.
+# 2. KIỂM TRA ĐỊNH DẠNG BẰNG REGEXP:
+#    - `{^[0-9]{9}[0-9X]$}`: Bắt buộc đúng 9 chữ số (0-9) + 1 chữ số cuối (0-9 hoặc X).
+#    - Nếu không khớp mẫu $\rightarrow$ Trả về `false` ngay lập tức.
 #
-# 3. CHECKSUM & MODULO 11:
-#    - Convert 'X' to 10.
-#    - Calculate weighted sum: `sum += val * (10 - i)`.
-#    - Return `expr {$sum % 11 == 0}`.
+# 3. TÍNH TỔNG TÍCH & KIỂM TRA CHIA HẾT CHO 11:
+#    - Duyệt 10 ký tự: `val` = ký tự 'X' thì lấy 10, ngược lại lấy chính chữ số đó.
+#    - Cộng dồn: `sum += val * (10 - i)`.
+#    - Kết quả: `expr {$sum % 11 == 0}`.
 # ==============================================================================
 
 proc isValid {isbn} {
