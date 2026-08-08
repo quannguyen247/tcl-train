@@ -98,88 +98,119 @@ proc cardValue {c} {
     return 0
 }
 
-proc simulateGame {deckA deckB} {
-    set pA $deckA
-    set pB $deckB
-    set pile {}
-    set total_cards 0
-    set total_tricks 0
-    array set history {}
-    
-    set current_player A
-    
-    while {1} {
-        set key "$pA-$pB-$pile-$current_player"
-        if {[info exists history($key)]} {
-            return [dict create status loop cards $total_cards tricks $total_tricks]
+proc otherPlayer {player} {
+    return [expr {$player eq "A" ? "B" : "A"}]
+}
+
+proc drawCard {player deckAName deckBName} {
+    upvar 1 $deckAName deckA $deckBName deckB
+
+    if {$player eq "A"} {
+        if {$deckA eq {}} {
+            return ""
         }
-        set history($key) 1
-        
-        if {$current_player eq "A"} {
-            if {[llength $pA] == 0} {
-                return [dict create status finished cards $total_cards tricks $total_tricks]
+        set card [lindex $deckA 0]
+        set deckA [lrange $deckA 1 end]
+    } else {
+        if {$deckB eq {}} {
+            return ""
+        }
+        set card [lindex $deckB 0]
+        set deckB [lrange $deckB 1 end]
+    }
+    return $card
+}
+
+proc gameState {deckA deckB starter} {
+    # Giá trị cụ thể của các lá số không ảnh hưởng loop
+    set normalA [lmap card $deckA {
+        expr {[cardValue $card] == 0 ? "N" : $card}
+    }]
+    set normalB [lmap card $deckB {
+        expr {[cardValue $card] == 0 ? "N" : $card}
+    }]
+    return [list $normalA $normalB $starter]
+}
+
+proc simulateGame {playerA playerB} {
+    set deckA $playerA
+    set deckB $playerB
+    set starter A
+    set cards 0
+    set tricks 0
+    set history {}
+
+    while {true} {
+        # Chỉ kiểm tra loop ở đầu mỗi round
+        set state [gameState $deckA $deckB $starter]
+        if {[dict exists $history $state]} {
+            return [dict create status loop cards $cards tricks $tricks]
+        }
+        dict set history $state 1
+
+        set pile {}
+        set current $starter
+        set winner ""
+
+        while {$winner eq ""} {
+            set card [drawCard $current deckA deckB]
+
+            # Không còn bài thì đối thủ thu pile
+            if {$card eq ""} {
+                set winner [otherPlayer $current]
+                break
             }
-            set card [lindex $pA 0]
-            set pA [lrange $pA 1 end]
+
+            lappend pile $card
+            incr cards
+            set penalty [cardValue $card]
+
+            # Lá số chỉ chuyển lượt
+            if {$penalty == 0} {
+                set current [otherPlayer $current]
+                continue
+            }
+
+            set lastPayment $current
+            set payer [otherPlayer $current]
+
+            while {$penalty > 0} {
+                set card [drawCard $payer deckA deckB]
+                if {$card eq ""} {
+                    set winner $lastPayment
+                    break
+                }
+
+                lappend pile $card
+                incr cards
+                set value [cardValue $card]
+
+                if {$value > 0} {
+                    # Lá payment mới chuyển nghĩa vụ cho đối thủ
+                    set lastPayment $payer
+                    set payer [otherPlayer $payer]
+                    set penalty $value
+                } else {
+                    incr penalty -1
+                }
+            }
+
+            if {$winner eq "" && $penalty == 0} {
+                set winner $lastPayment
+            }
+        }
+
+        # Người thắng đặt pile xuống cuối bộ bài
+        incr tricks
+        if {$winner eq "A"} {
+            set deckA [concat $deckA $pile]
         } else {
-            if {[llength $pB] == 0} {
-                return [dict create status finished cards $total_cards tricks $total_tricks]
-            }
-            set card [lindex $pB 0]
-            set pB [lrange $pB 1 end]
+            set deckB [concat $deckB $pile]
         }
-        
-        lappend pile $card
-        incr total_cards
-        
-        set val [cardValue $card]
-        if {$val > 0} {
-            set payment_required $val
-            set paying_player [expr {$current_player eq "A" ? "B" : "A"}]
-            set trick_won 0
-            
-            while {$payment_required > 0} {
-                if {$paying_player eq "A"} {
-                    if {[llength $pA] == 0} {
-                        return [dict create status finished cards $total_cards tricks $total_tricks]
-                    }
-                    set p_card [lindex $pA 0]
-                    set pA [lrange $pA 1 end]
-                } else {
-                    if {[llength $pB] == 0} {
-                        return [dict create status finished cards $total_cards tricks $total_tricks]
-                    }
-                    set p_card [lindex $pB 0]
-                    set pB [lrange $pB 1 end]
-                }
-                
-                lappend pile $p_card
-                incr total_cards
-                
-                set p_val [cardValue $p_card]
-                if {$p_val > 0} {
-                    set current_player $paying_player
-                    set payment_required $p_val
-                    set paying_player [expr {$current_player eq "A" ? "B" : "A"}]
-                } else {
-                    incr payment_required -1
-                    if {$payment_required == 0} {
-                        set trick_won 1
-                    }
-                }
-            }
-            
-            if {$trick_won} {
-                incr total_tricks
-                if {$current_player eq "A"} {
-                    set pA [concat $pA $pile]
-                } else {
-                    set pB [concat $pB $pile]
-                }
-                set pile {}
-            }
-        } else {
-            set current_player [expr {$current_player eq "A" ? "B" : "A"}]
+
+        if {$deckA eq {} || $deckB eq {}} {
+            return [dict create status finished cards $cards tricks $tricks]
         }
+        set starter $winner
     }
 }
