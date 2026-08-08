@@ -43,25 +43,21 @@ proc sharedBirthday {birthdays} {
 
 proc randomBirthdates {count} {
     set res {}
-    set days_in_month {31 28 31 30 31 30 31 31 30 31 30 31}
+
+    # Chọn đều một trong 365 ngày của năm không nhuận
     for {set i 0} {$i < $count} {incr i} {
-        set month [expr {int(rand() * 12) + 1}]
-        set max_day [lindex $days_in_month [expr {$month - 1}]]
-        set day [expr {int(rand() * $max_day) + 1}]
-        set year [expr {int(rand() * 50) + 1970}]
-        lappend res [format "%04d-%02d-%02d" $year $month $day]
+        set year [expr {2001 + int(rand() * 3)}]
+        set day [expr {int(rand() * 365) + 1}]
+        lappend res [clock format \
+            [clock scan "$year-$day" -format {%Y-%j}] -format %Y-%m-%d]
     }
     return $res
 }
 
 proc estimatedProbabilityOfSharedBirthday {size} {
-    set trials 1000
-    set shared 0
-    for {set i 0} {$i < $trials} {incr i} {
-        set dates [randomBirthdates $size]
-        if {[sharedBirthday $dates]} {
-            incr shared
-        }
+    set distinct 1.0
+    for {set i 0} {$i < $size} {incr i} {
+        set distinct [expr {$distinct * (365.0 - $i) / 365.0}]
     }
-    return [expr {double($shared) / $trials}]
+    return [expr {100 * (1 - $distinct)}]
 }
