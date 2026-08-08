@@ -5,9 +5,10 @@
 # YOUR SOLUTION CODE BELOW
 # ==============================================================================
 
-oo::class create CustomSet {
+oo::class create Set {
     variable elems
 
+    # Lưu mỗi phần tử một lần
     constructor {{elements {}}} {
         set elems {}
         foreach e $elements {
@@ -87,33 +88,36 @@ oo::class create CustomSet {
     }
 
     method intersection {otherSet} {
+        # Lấy phần tử có trong cả hai set
         set res {}
         foreach e $elems {
             if {[$otherSet contains? $e]} {
                 lappend res $e
             }
         }
-        return [CustomSet new $res]
+        return [Set new $res]
     }
 
     method difference {otherSet} {
+        # Lấy phần tử chỉ có trong set hiện tại
         set res {}
         foreach e $elems {
             if {![$otherSet contains? $e]} {
                 lappend res $e
             }
         }
-        return [CustomSet new $res]
+        return [Set new $res]
     }
 
     method union {otherSet} {
+        # Gộp hai set và loại phần tử trùng
         set res $elems
         foreach e [$otherSet getElements] {
             if {[lsearch -exact $res $e] == -1} {
                 lappend res $e
             }
         }
-        return [CustomSet new $res]
+        return [Set new $res]
     }
 
     method size {} {
@@ -124,5 +128,3 @@ oo::class create CustomSet {
         return [lsort -integer $elems]
     }
 }
-
-interp alias {} Set {} CustomSet
