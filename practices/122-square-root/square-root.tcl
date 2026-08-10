@@ -1,4 +1,9 @@
 proc squareRoot {radicand} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    set x $radicand
+    set y 1
+    while {$x > $y} {
+        set x [expr {($x + $y) / 2}]
+        set y [expr {$radicand / $x}]
+    }
+    return $x
 }
-
