@@ -1,11 +1,14 @@
-proc onEarth {} {error "Implement this procedure."}
-proc onMercury {} {error "Implement this procedure."}
-proc onVenus {} {error "Implement this procedure."}
-proc onMars {} {error "Implement this procedure."}
-proc onJupiter {} {error "Implement this procedure."}
-proc onSaturn {} {error "Implement this procedure."}
-proc onUranus {} {error "Implement this procedure."}
-proc onNeptune {} {error "Implement this procedure."}
+set EARTH_YEAR_SECONDS 31557600.0
 
-# extra credit: generate the procedures programmatically
+set planets {
+    Mercury 0.2408467 Venus 0.61519726 Earth 1.0 Mars 1.8808158
+    Jupiter 11.862615 Saturn 29.447498 Uranus 84.016846 Neptune 164.79132
+}
 
+dict for {planet period} $planets {
+    proc on$planet {seconds} "return \[expr {\$seconds / ($EARTH_YEAR_SECONDS * $period)}\]"
+}
+
+proc unknown {cmd args} {
+    error "not a planet"
+}
