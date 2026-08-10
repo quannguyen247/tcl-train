@@ -1,8 +1,17 @@
 proc keep {varname list condition} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    upvar 1 $varname v
+    set res {}
+    foreach v $list {
+        if {[uplevel 1 $condition]} { lappend res $v }
+    }
+    return $res
 }
 
 proc discard {varname list condition} {
-    throw {NOT_IMPLEMENTED} "Implement this procedure."
+    upvar 1 $varname v
+    set res {}
+    foreach v $list {
+        if {![uplevel 1 $condition]} { lappend res $v }
+    }
+    return $res
 }
-
