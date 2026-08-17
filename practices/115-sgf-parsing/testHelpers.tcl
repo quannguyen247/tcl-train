@@ -25,7 +25,7 @@ proc cleanupTests {} {
 # Compare two SGF trees
 proc sgfTreeMatch {expected actual} {
     if {
-        ![string is dict -strict $actual]
+        [catch {dict size $actual}]
         || [dict size $actual] != 2
         || [lsort [dict keys $actual]] ne {children properties}
     } {

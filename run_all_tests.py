@@ -51,7 +51,7 @@ def tcl_version(candidate: str) -> tuple[int, int] | None:
 
 
 def find_tclsh(explicit: str | None) -> str:
-    """Return a Tcl 9 interpreter or fail with a clear message."""
+    """Return a usable tclsh (8.6+) or raise FileNotFoundError."""
     candidates = [
         explicit,
         shutil.which("tclsh90"),
@@ -62,12 +62,22 @@ def find_tclsh(explicit: str | None) -> str:
         r"C:\Tcl\bin\tclsh.exe",
         r"C:\Program Files\Tcl\bin\tclsh.exe",
     ]
+    best: str | None = None
     for candidate in candidates:
-        if candidate and Path(candidate).exists() and (tcl_version(candidate) or (0, 0)) >= (9, 0):
-            return str(candidate)
+        if not candidate:
+            continue
+        ver = tcl_version(candidate)
+        if ver is None:
+            continue
+        if ver >= (9, 0):
+            return str(candidate)   # prefer Tcl 9 if available
+        if ver >= (8, 6) and best is None:
+            best = str(candidate)   # fall back to Tcl 8.6
+    if best:
+        return best
     raise FileNotFoundError(
-        "Tcl 9.0 or newer was not found. Install Tcl 9 or pass "
-        "--tclsh C:\\path\\to\\tclsh90.exe"
+        "Tcl 8.6 or newer was not found. Install Tcl or pass "
+        "--tclsh C:\\path\\to\\tclsh.exe"
     )
 
 
@@ -77,7 +87,7 @@ def classify(test_file: Path, tclsh: str, timeout: int) -> Result:
     env["RUN_ALL"] = "1"
     try:
         completed = subprocess.run(
-            [tclsh, test_file.name],
+            [tclsh, "-encoding", "utf-8", test_file.name],
             cwd=test_file.parent,
             capture_output=True,
             text=True,
@@ -112,6 +122,8 @@ def classify(test_file: Path, tclsh: str, timeout: int) -> Result:
 
 
 def main() -> int:
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tclsh", help="path to a Tcl 9 interpreter")
     parser.add_argument("--timeout", type=int, default=30, help="seconds allowed per suite")
@@ -135,7 +147,14 @@ def main() -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
 
-    print(f"Tcl interpreter: {tclsh}")
+    tclver = tcl_version(tclsh)
+    print(f"Tcl interpreter: {tclsh} (Tcl {'.'.join(map(str, tclver)) if tclver else '?'})")
+    if tclver and tclver < (9, 0):
+        print(
+            f"WARNING: Tcl {'.'.join(map(str, tclver))} detected; "
+            "exercises that declare 'package require Tcl 9.0' will fail.\n"
+            "         Install Tcl 9 or pass --tclsh to suppress this warning."
+        )
     print(f"Exercise suites: {len(test_files)}")
 
     results = [classify(test_file, tclsh, args.timeout) for test_file in test_files]

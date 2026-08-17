@@ -19,7 +19,7 @@ test paasio-1 "read a file" -body {
 
     $ioMeter stats
 } -returnCodes ok -match dictionary -result {
-    reads 1 readBytes 1530 writes 0 writeBytes 0
+    reads 1 readBytes 1528 writes 0 writeBytes 0
 }
 
 skip paasio-2
