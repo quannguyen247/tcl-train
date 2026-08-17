@@ -1,98 +1,60 @@
-# Tcl for EDA, DFT, and Problem Solving
+# Tcl Training: EDA Automation
 
-An English-language Tcl learning repository combining:
+`tcl-train` is a comprehensive Tcl learning and reference repository tailored for semiconductor engineering and IC design automation.
 
-- focused language lessons in [`courses/`](courses/);
-- 135 active Exercism solutions in [`practices/`](practices/);
-- Vivado automation examples in [`vivado/`](vivado/);
-- an applied project in [`capstone/`](capstone/).
+Tcl (Tool Command Language) is the industry-standard scripting interface across electronic design automation (EDA) software suites—including RTL design, Logic Synthesis, Static Timing Analysis (STA), Physical Design (PD), and Design for Testability (DFT).
 
-The examples emphasize readable Tcl that transfers to ASIC/FPGA, EDA,
-physical-design, and DFT automation.
+This repository provides structured lessons, 135 algorithm practice suites, Vivado tool scripts, and real-world EDA automation workflows.
 
-## Repository layout
+---
+
+## Repository Structure
 
 ```text
 tcl-train/
-|-- .github/workflows/ci.yml
-|-- README.md
-|-- NOTE.md
-|-- roadmap.md
-|-- courses/
-|-- practices/
-|-- vivado/
-`-- capstone/
+├── courses/          # Core Tcl syntax and language fundamentals
+├── practices/        # 135 algorithm practice suites
+├── vivado/           # Xilinx Vivado automation scripts
+├── capstone/         # Applied EDA workflow project
+├── NOTE.md           # Reusable Tcl patterns, idioms, and techniques
+├── LICENSE           # MIT License
+└── README.md
 ```
 
-## Practice collection
+---
 
-The repository follows the 135 exercises marked active by the Exercism Tcl
-track on August 11, 2026. Tests and instructions were refreshed from
-`exercism/tcl` commit `c42295e0b80f25ec0241d0d49756544c89e3f828`.
+## Practices Overview
 
-The repository contains 135 practice exercises, aligning perfectly with the active exercises currently published on the Exercism web platform for the Tcl track.
+The `practices/` directory contains 135 standalone practice exercises. The directory numbering extends up to `140` to maintain stable historical references, skipping 5 deprecated upstream track items (`accumulate`, `beer-song`, `diffie-hellman`, `minesweeper`, `scale-generator`).
 
-Historically, the upstream `exercism/tcl` repository contained 140 exercises. Five of these were subsequently deprecated and removed by the track maintainers. To maintain stable directory identifiers and preserve existing references, the local directories have not been renumbered. Consequently, the directory prefixes range up to `140`, intentionally skipping the five deprecated exercises:
+### Technical Compatibility
+- **`paasio`**: Enforces LF line endings for deterministic cross-platform byte counts on Windows and Linux.
+- **`zebra-puzzle`**: Bundles the required upstream `lib/permutations` package for standalone local execution.
 
-- `accumulate`
-- `beer-song`
-- `diffie-hellman`
-- `minesweeper`
-- `scale-generator`
+---
 
-Solutions were compared against the author's Exercism GitHub Syncer backup.
-The latest synced iteration is used after removing comments and normalizing
-formatting. Two compatibility additions are retained:
+## Getting Started
 
-- `paasio` normalizes file output to LF so byte counts are stable on Windows.
-- `zebra-puzzle` includes its required upstream `lib/permutations` package.
+### Prerequisites
+- **Tcl**: 9.0+ (Tested on Tcl 9.0.4)
+- **Thread Extension**: 3.0+ (Tested on Thread 3.0.6)
 
-## Requirements
+### Running Tests Locally
 
-- Tcl 9.0 or newer
-- Thread extension 3.0 or newer
-
-The verified local environment is Tcl 9.0.4 with Thread 3.0.6.
-
-## Run one exercise
-
-PowerShell:
+Run an individual test suite using `tclsh90`:
 
 ```powershell
 $env:RUN_ALL = "1"
 cd practices/002-acronym
-C:\Users\Quan\AppData\Local\Apps\Tcl90\bin\tclsh90.exe acronym.test.tcl -verbose p
+tclsh90 acronym.test.tcl -verbose p
 ```
 
-The `-verbose p` option prints every passing test case. A failing case already
-prints its body, actual result, expected result, and stack trace through
-`tcltest`.
+### Continuous Integration (CI)
 
-## Continuous integration
+GitHub Actions runs automated testing via a **Matrix Strategy** (135 parallel jobs), ensuring every exercise suite is independently validated on every push.
 
-GitHub Actions builds pinned Tcl 9.0.4 and Thread 3.0.6 releases, then runs all
-135 suites directly. The workflow:
+---
 
-- enables every Exercism case with `RUN_ALL=1`;
-- prints every passing case as `++++ case-name PASSED`;
-- preserves full failure details;
-- groups logs by exercise;
-- writes a suite summary to the Actions job summary;
-- fails if fewer than 135 suites are found or any suite fails.
+## License
 
-## Coding conventions
-
-- Use four spaces for indentation.
-- Brace expressions passed to `if`, `while`, and `expr`.
-- Use list and dictionary commands instead of string-shaped data manipulation.
-- Keep required exercise APIs unchanged.
-- Prefer clear control flow over code golf.
-- Keep problem statements in `README.md`, not in solution comments.
-
-## Attribution
-
-Practice statements and tests come from the open-source
-[Exercism Tcl track](https://github.com/exercism/tcl). Solutions are the
-author's submitted iterations backed up through Exercism GitHub Syncer.
-
-Maintained by [quannguyen247](https://github.com/quannguyen247).
+This project is licensed under the [MIT License](LICENSE).

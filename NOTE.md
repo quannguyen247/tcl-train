@@ -303,6 +303,60 @@ close $channel
 - Parallelism helps only when work is large enough to exceed setup and
   communication overhead.
 
+## Advanced Tcl Features & Tricks
+
+### Coroutines and Generators
+Tcl 8.6+ has powerful support for coroutines, allowing you to pause (`yield`) and resume execution. This is extremely useful for generators, state machines, and lazy evaluation:
+```tcl
+proc generator {} {
+    yield [info coroutine]
+    yield 1
+    yield 2
+    return 3
+}
+coroutine nextNum generator
+set a [nextNum] ;# 1
+set b [nextNum] ;# 2
+```
+
+### Math as Commands
+You can avoid `expr` by using math operators directly as commands via the `::tcl::mathop::` namespace. This is great for functional programming styles (like folding/reducing a list):
+```tcl
+set sum [::tcl::mathop::+ 1 2 3 4]
+set product [::tcl::mathop::* {*}[list 2 3 4]]
+```
+
+### Searching Complex Lists
+`lsearch` is incredibly powerful for nested lists (list of lists or list of dicts). You can search by specific index and extract results inline:
+```tcl
+set records {{John 25} {Alice 30} {Bob 25}}
+# Find all records where age (index 1) is 25
+set young [lsearch -all -inline -index 1 -exact $records 25]
+```
+
+### Variable Tracing
+Tcl allows you to execute callbacks automatically whenever a variable is read, written, or unset using the `trace` command. This is heavily used in Tk for reactive UIs but is also great for debugging or data validation:
+```tcl
+proc watchVar {name1 name2 op} {
+    puts "Variable $name1 was modified!"
+}
+set myVar 10
+trace add variable myVar write watchVar
+set myVar 20 ;# Triggers the callback
+```
+
+### Safe Interpreters (Sandboxing)
+Tcl was designed with embeddability in mind. You can create isolated, restricted sandboxes (`safe interpreters`) to execute untrusted code without allowing access to the file system or network:
+```tcl
+set sandbox [interp create -safe]
+$sandbox eval {
+    # This works
+    set x [expr {1 + 1}]
+    # This will throw an error (command not found)
+    open "/etc/passwd" r
+}
+```
+
 ## Common mistakes caught by the exercises
 
 - Forgetting `RUN_ALL=1` and accidentally running only the first progressive
