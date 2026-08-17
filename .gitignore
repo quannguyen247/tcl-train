@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+
+# Optional local runner; CI executes Tcltest suites directly.
+/run_all_tests.py
+
+# Local diagnostics and one-off repository maintenance artifacts.
+/contrib_counts.json
+/contribs.html
+/distribute_dates*.py
+/parse_bs4.py
+/parse_contribs.py
+/print_snippet.py
+/rewrite_dates.py
+/sign_commits.py
+/test_failures.txt
+/test_scan.tcl

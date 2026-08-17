@@ -1,35 +1,110 @@
-name: Tcl Tests
+name: Tcl practice tests
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tcl-tests-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Cache Tcl 9.0 build
+      - name: Restore Tcl 9.0.4 and Thread 3.0.6
         id: cache-tcl
         uses: actions/cache@v4
         with:
-          path: /usr/local/bin/tclsh9.0
-          key: ${{ runner.os }}-tcl-9.0.0
+          path: ~/.local/tcl90
+          key: ${{ runner.os }}-tcl-9.0.4-thread-3.0.6-v1
 
-      - name: Install Tcl 9.0 from source
+      - name: Install build dependencies
         if: steps.cache-tcl.outputs.cache-hit != 'true'
         run: |
-          wget https://prdownloads.sourceforge.net/tcl/tcl9.0.0-src.tar.gz
-          tar xfz tcl9.0.0-src.tar.gz
-          cd tcl9.0.0/unix
-          ./configure
-          make
-          sudo make install
+          sudo apt-get update
+          sudo apt-get install --yes build-essential autoconf
 
-      - name: Run Test Suite
-        run: python3 run_all_tests.py
+      - name: Build Tcl 9.0.4
+        if: steps.cache-tcl.outputs.cache-hit != 'true'
+        run: |
+          git clone --depth 1 --branch core-9-0-4 https://github.com/tcltk/tcl.git /tmp/tcl
+          cd /tmp/tcl/unix
+          ./configure --prefix="$HOME/.local/tcl90" --enable-threads
+          make --jobs "$(nproc)"
+          make install
+
+      - name: Build Thread 3.0.6
+        if: steps.cache-tcl.outputs.cache-hit != 'true'
+        run: |
+          curl -sL https://downloads.sourceforge.net/project/tcl/Tcl/9.0.4/thread3.0.6.tar.gz | tar -xz -C /tmp
+          mv /tmp/thread3.0.6 /tmp/thread
+          cd /tmp/thread
+          ./configure \
+            --prefix="$HOME/.local/tcl90" \
+            --with-tcl="/tmp/tcl/unix"
+          make --jobs "$(nproc)"
+          make install
+
+      - name: Verify Tcl environment
+        run: |
+          TCLSH="$(find "$HOME/.local/tcl90/bin" -maxdepth 1 -type f -name 'tclsh*' | sort | head -n 1)"
+          test -n "$TCLSH"
+          "$TCLSH" <<'TCL'
+          puts "Tcl [info patchlevel]"
+          puts "Thread [package require Thread]"
+          TCL
+
+      - name: Run every test case
+        shell: bash
+        run: |
+          set +e
+          TCLSH="$(find "$HOME/.local/tcl90/bin" -maxdepth 1 -type f -name 'tclsh*' | sort | head -n 1)"
+          mapfile -t TESTS < <(find practices -mindepth 2 -maxdepth 2 -type f -name '*.test.tcl' | sort)
+
+          total=${#TESTS[@]}
+          passed=0
+          failed=0
+
+          for test_file in "${TESTS[@]}"; do
+            exercise="$(basename "$(dirname "$test_file")")"
+            test_name="$(basename "$test_file")"
+
+            echo "::group::$exercise"
+            (
+              cd "$(dirname "$test_file")"
+              RUN_ALL=1 "$TCLSH" "$test_name" -verbose p
+            )
+            status=$?
+
+            if (( status == 0 )); then
+              ((passed += 1))
+              echo "SUITE PASS: $exercise"
+            else
+              ((failed += 1))
+              echo "::error title=Suite failed::$exercise exited with status $status"
+            fi
+            echo "::endgroup::"
+          done
+
+          echo "Suite summary: total=$total passed=$passed failed=$failed"
+          {
+            echo "## Tcl practice test summary"
+            echo
+            echo "| Total | Passed | Failed |"
+            echo "| ---: | ---: | ---: |"
+            echo "| $total | $passed | $failed |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          test "$total" -eq 135
+          test "$failed" -eq 0
