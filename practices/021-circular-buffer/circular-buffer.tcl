@@ -1,9 +1,8 @@
 oo::class create CircularBuffer {
-    variable cap
-    variable buffer
+    variable capacity buffer
 
-    constructor {capacity} {
-        set cap $capacity
+    constructor {cap} {
+        set capacity $cap
         set buffer {}
     }
 
@@ -12,30 +11,30 @@ oo::class create CircularBuffer {
     }
 
     method full? {} {
-        return [expr {[llength $buffer] == $cap}]
+        return [expr {[llength $buffer] == $capacity}]
     }
 
     method read {} {
         if {[my empty?]} {
             error "buffer is empty"
         }
-        set item [lindex $buffer 0]
+        set val [lindex $buffer 0]
         set buffer [lrange $buffer 1 end]
-        return $item
+        return $val
     }
 
-    method write {item} {
+    method write {value} {
         if {[my full?]} {
             error "buffer is full"
         }
-        lappend buffer $item
+        lappend buffer $value
     }
 
-    method overwrite {item} {
+    method overwrite {value} {
         if {[my full?]} {
             set buffer [lrange $buffer 1 end]
         }
-        lappend buffer $item
+        lappend buffer $value
     }
 
     method clear {} {

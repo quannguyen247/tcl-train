@@ -1,54 +1,37 @@
 oo::class create BankAccount {
-    variable is_open
-    variable acc_balance
+    variable isOpen bal
 
     constructor {} {
-        set is_open 0
-        set acc_balance 0
+        set isOpen false
+        set bal 0
     }
 
     method open {} {
-        if {$is_open} {
-            error "account already open"
-        }
-        set is_open 1
-        set acc_balance 0
+        if {$isOpen} { return -code error "account already open" }
+        set isOpen true
+        set bal 0
     }
 
     method close {} {
-        if {!$is_open} {
-            error "account not open"
-        }
-        set is_open 0
+        if {!$isOpen} { return -code error "account not open" }
+        set isOpen false
     }
 
     method balance {} {
-        if {!$is_open} {
-            error "account not open"
-        }
-        return $acc_balance
+        if {!$isOpen} { return -code error "account not open" }
+        return $bal
     }
 
     method deposit {amount} {
-        if {!$is_open} {
-            error "account not open"
-        }
-        if {$amount <= 0} {
-            error "amount must be greater than 0"
-        }
-        set acc_balance [expr {$acc_balance + $amount}]
+        if {!$isOpen} { return -code error "account not open" }
+        if {$amount <= 0} { return -code error "amount must be greater than 0" }
+        incr bal $amount
     }
 
     method withdraw {amount} {
-        if {!$is_open} {
-            error "account not open"
-        }
-        if {$amount <= 0} {
-            error "amount must be greater than 0"
-        }
-        if {$amount > $acc_balance} {
-            error "amount must be less than balance"
-        }
-        set acc_balance [expr {$acc_balance - $amount}]
+        if {!$isOpen} { return -code error "account not open" }
+        if {$amount <= 0} { return -code error "amount must be greater than 0" }
+        if {$amount > $bal} { return -code error "amount must be less than balance" }
+        incr bal -$amount
     }
 }

@@ -1,118 +1,70 @@
 oo::class create ComplexNumber {
-    variable r
-    variable i
+    variable r i
 
-    constructor {real_part imag_part} {
-        set r $real_part
-        set i $imag_part
+    constructor {real imag} {
+        set r $real
+        set i $imag
     }
 
     method real {} { return $r }
     method imag {} { return $i }
-    method toList {} { return [list $r $i] }
+    method toList {} { list $r $i }
 
     method add {other} {
         if {[info object is object $other]} {
-            set ar [$other real]
-            set ai [$other imag]
-        } else {
-            set ar $other
-            set ai 0
+            return [ComplexNumber new [expr {$r + [$other real]}] [expr {$i + [$other imag]}]]
         }
-        return [ComplexNumber new [expr {$r + $ar}] [expr {$i + $ai}]]
+        ComplexNumber new [expr {$r + $other}] $i
     }
 
     method sub {other} {
         if {[info object is object $other]} {
-            set ar [$other real]
-            set ai [$other imag]
-        } else {
-            set ar $other
-            set ai 0
+            return [ComplexNumber new [expr {$r - [$other real]}] [expr {$i - [$other imag]}]]
         }
-        return [ComplexNumber new [expr {$r - $ar}] [expr {$i - $ai}]]
+        ComplexNumber new [expr {$r - $other}] $i
     }
 
     method mul {other} {
         if {[info object is object $other]} {
-            set ar [$other real]
-            set ai [$other imag]
-            set nr [expr {$r * $ar - $i * $ai}]
-            set ni [expr {$r * $ai + $i * $ar}]
-        } else {
-            set nr [expr {$r * $other}]
-            set ni [expr {$i * $other}]
+            set ar [$other real]; set ai [$other imag]
+            return [ComplexNumber new [expr {$r*$ar - $i*$ai}] [expr {$r*$ai + $i*$ar}]]
         }
-        return [ComplexNumber new $nr $ni]
+        ComplexNumber new [expr {$r * $other}] [expr {$i * $other}]
     }
 
     method div {other} {
         if {[info object is object $other]} {
-            set ar [expr {double([$other real])}]
-            set ai [expr {double([$other imag])}]
-            set denom [expr {$ar * $ar + $ai * $ai}]
-            set nr [expr {($r * $ar + $i * $ai) / $denom}]
-            set ni [expr {($i * $ar - $r * $ai) / $denom}]
-        } else {
-            set o [expr {double($other)}]
-            set nr [expr {$r / $o}]
-            set ni [expr {$i / $o}]
+            set ar [expr {double([$other real])}]; set ai [expr {double([$other imag])}]
+            set d [expr {$ar*$ar + $ai*$ai}]
+            return [ComplexNumber new [expr {($r*$ar + $i*$ai)/$d}] [expr {($i*$ar - $r*$ai)/$d}]]
         }
-        return [ComplexNumber new $nr $ni]
+        ComplexNumber new [expr {$r / double($other)}] [expr {$i / double($other)}]
     }
 
-    method abs {} {
-        return [expr {hypot($r, $i)}]
-    }
-
-    method conj {} {
-        return [ComplexNumber new $r [expr {-$i}]]
-    }
-
+    method abs {} { expr {hypot($r, $i)} }
+    method conj {} { ComplexNumber new $r [expr {-$i}] }
     method exp {} {
         set er [expr {exp($r)}]
-        set nr [expr {$er * cos($i)}]
-        set ni [expr {$er * sin($i)}]
-        return [ComplexNumber new $nr $ni]
+        ComplexNumber new [expr {$er * cos($i)}] [expr {$er * sin($i)}]
     }
 }
 
 proc tcl::mathfunc::cr_add {a b} {
-    if {[info object is object $a] && [info object is object $b]} {
-        return [$a add $b]
-    } elseif {[info object is object $a]} {
-        return [$a add $b]
-    } else {
-        return [[ComplexNumber new $a 0] add $b]
-    }
+    if {[info object is object $a]} { return [$a add $b] }
+    [ComplexNumber new $a 0] add $b
 }
 
 proc tcl::mathfunc::cr_sub {a b} {
-    if {[info object is object $a] && [info object is object $b]} {
-        return [$a sub $b]
-    } elseif {[info object is object $a]} {
-        return [$a sub $b]
-    } else {
-        return [[ComplexNumber new $a 0] sub $b]
-    }
+    if {[info object is object $a]} { return [$a sub $b] }
+    [ComplexNumber new $a 0] sub $b
 }
 
 proc tcl::mathfunc::cr_mul {a b} {
-    if {[info object is object $a] && [info object is object $b]} {
-        return [$a mul $b]
-    } elseif {[info object is object $a]} {
-        return [$a mul $b]
-    } else {
-        return [[ComplexNumber new $a 0] mul $b]
-    }
+    if {[info object is object $a]} { return [$a mul $b] }
+    [ComplexNumber new $a 0] mul $b
 }
 
 proc tcl::mathfunc::cr_div {a b} {
-    if {[info object is object $a] && [info object is object $b]} {
-        return [$a div $b]
-    } elseif {[info object is object $a]} {
-        return [$a div $b]
-    } else {
-        return [[ComplexNumber new $a 0] div $b]
-    }
+    if {[info object is object $a]} { return [$a div $b] }
+    [ComplexNumber new $a 0] div $b
 }

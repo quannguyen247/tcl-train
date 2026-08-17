@@ -1,30 +1,30 @@
-set ALLERGENS {
-    eggs 1
-    peanuts 2
-    shellfish 4
-    strawberries 8
-    tomatoes 16
-    chocolate 32
-    pollen 64
-    cats 128
-}
+namespace eval Allergies {
+    namespace export allergicTo listAllergies
 
-proc allergicTo {allergen score} {
-    global ALLERGENS
-    if {![dict exists $ALLERGENS $allergen]} {
-        return false
+    variable allergen_dict {
+        eggs 1 peanuts 2 shellfish 4 strawberries 8
+        tomatoes 16 chocolate 32 pollen 64 cats 128
     }
-    set val [dict get $ALLERGENS $allergen]
-    return [expr {($score & $val) != 0}]
-}
 
-proc listAllergies {score} {
-    global ALLERGENS
-    set result {}
-    dict for {item val} $ALLERGENS {
-        if {($score & $val) != 0} {
-            lappend result $item
+    proc allergicTo {allergen score} {
+        variable allergen_dict
+        if {![dict exists $allergen_dict $allergen]} {
+            return false
         }
+        set val [dict get $allergen_dict $allergen]
+        return [expr {($score & $val) != 0}]
     }
-    return $result
+
+    proc listAllergies {score} {
+        variable allergen_dict
+        set result {}
+        dict for {item val} $allergen_dict {
+            if {($score & $val) != 0} {
+                lappend result $item
+            }
+        }
+        return $result
+    }
 }
+
+namespace import Allergies::*

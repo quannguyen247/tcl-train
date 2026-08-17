@@ -1,6 +1,5 @@
 proc squareOfSum {n} {
-    set s [expr {$n * ($n + 1) / 2}]
-    return [expr {$s * $s}]
+    return [expr {($n * ($n + 1) / 2) ** 2}]
 }
 
 proc sumOfSquares {n} {

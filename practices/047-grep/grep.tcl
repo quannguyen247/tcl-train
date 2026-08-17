@@ -2,7 +2,6 @@ proc grep {args} {
     set flags [dict create n 0 l 0 i 0 v 0 x 0]
     set options $args
 
-    # Đọc các cờ trước tên file
     while {[string match -* [lindex $options 0]]} {
         foreach flag [split [string range [lindex $options 0] 1 end] ""] {
             if {[dict exists $flags $flag]} {
@@ -22,15 +21,16 @@ proc grep {args} {
         set lines [split [read $channel] "\n"]
         close $channel
 
-        # Bỏ phần tử rỗng do ký tự xuống dòng cuối file
         if {[lindex $lines end] eq {}} {
             set lines [lrange $lines 0 end-1]
         }
 
         set fileMatch false
         set lineNumber 0
+
         foreach line $lines {
             incr lineNumber
+
             if {[dict get $flags x]} {
                 if {[dict get $flags i]} {
                     set match [string equal -nocase $pattern $line]
@@ -47,9 +47,11 @@ proc grep {args} {
                     set match [expr {[string first $pattern $line] >= 0}]
                 }
             }
+
             if {[dict get $flags v]} {
                 set match [expr {!$match}]
             }
+
             if {!$match} {
                 continue
             }
@@ -66,6 +68,7 @@ proc grep {args} {
             if {[dict get $flags n]} {
                 append prefix "$lineNumber:"
             }
+
             lappend result "$prefix$line"
         }
 
@@ -76,4 +79,3 @@ proc grep {args} {
 
     return [join $result "\n"]
 }
-

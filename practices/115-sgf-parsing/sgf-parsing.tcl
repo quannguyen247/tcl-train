@@ -3,7 +3,7 @@ proc parse {input} {
     if {$input eq "" || [string index $input 0] ne "(" || [string index $input end] ne ")"} {
         error "tree missing"
     }
-    
+
     set inner [string range $input 1 end-1]
     if {$inner eq "" || [string index $inner 0] ne ";"} {
         error "tree with no nodes"
@@ -16,18 +16,18 @@ proc parse {input} {
 proc parseNode {str idxVar} {
     upvar 1 $idxVar idx
     set len [string length $str]
-    
+
     if {$idx >= $len || [string index $str $idx] ne ";"} {
         error "tree with no nodes"
     }
     incr idx
 
     set props [dict create]
-    
+
     while {$idx < $len} {
         set c [string index $str $idx]
         if {$c eq ";" || $c eq "(" || $c eq ")"} { break }
-        
+
         set key ""
         while {$idx < $len} {
             set c [string index $str $idx]
@@ -37,7 +37,7 @@ proc parseNode {str idxVar} {
             append key $c
             incr idx
         }
-        
+
         if {$key eq "" || $idx >= $len || [string index $str $idx] ne "\["} {
             error "properties without delimiter"
         }
@@ -47,11 +47,11 @@ proc parseNode {str idxVar} {
             incr idx
             set val ""
             set escaped 0
-            
+
             while {$idx < $len} {
                 set c [string index $str $idx]
                 incr idx
-                
+
                 if {$escaped} {
                     set escaped 0
                     if {$c eq "n"} { set c "\n" }
@@ -65,11 +65,11 @@ proc parseNode {str idxVar} {
                     append val $c
                 }
             }
-            
+
             regsub -all "\t" $val " " val
             regsub -all {\\([tn ])} $val {\1} val
             regsub -all {\\\n} $val {} val
-            
+
             lappend values $val
         }
         dict set props $key $values

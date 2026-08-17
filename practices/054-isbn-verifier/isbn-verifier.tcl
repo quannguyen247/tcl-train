@@ -1,16 +1,16 @@
 proc isValid {isbn} {
     set clean [string map {- ""} $isbn]
-    if {![regexp {^\d{9}[\dX]$} $clean]} { return false }
+
+    if {![regexp {^[0-9]{9}[0-9X]$} $clean]} {
+        return false
+    }
 
     set sum 0
-    set weight 10
-    foreach char [split $clean ""] {
+    for {set i 0} {$i < 10} {incr i} {
+        set char [string index $clean $i]
         set val [expr {$char eq "X" ? 10 : $char}]
-        incr sum [expr {$val * $weight}]
-        incr weight -1
+        set sum [expr {$sum + $val * (10 - $i)}]
     }
+
     return [expr {$sum % 11 == 0}]
 }
-
-
-

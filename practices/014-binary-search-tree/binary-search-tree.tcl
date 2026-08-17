@@ -33,33 +33,49 @@ oo::class create BinarySearchTree {
         if {$value eq ""} {
             return {}
         }
-        set ldict [expr {$leftNode eq "" ? {} : [$leftNode toDict]}]
-        set rdict [expr {$rightNode eq "" ? {} : [$rightNode toDict]}]
-        return [dict create data $value left $ldict right $rdict]
+
+        set left [expr {
+            $leftNode eq "" ? {} : [$leftNode toDict]
+        }]
+        set right [expr {
+            $rightNode eq "" ? {} : [$rightNode toDict]
+        }]
+
+        return [dict create data $value left $left right $right]
     }
 
     method sorted {} {
         if {$value eq ""} {
             return {}
         }
-        set llist [expr {$leftNode eq "" ? {} : [$leftNode sorted]}]
-        set rlist [expr {$rightNode eq "" ? {} : [$rightNode sorted]}]
-        return [concat $llist [list $value] $rlist]
+
+        set left [expr {
+            $leftNode eq "" ? {} : [$leftNode sorted]
+        }]
+        set right [expr {
+            $rightNode eq "" ? {} : [$rightNode sorted]
+        }]
+
+        return [concat $left [list $value] $right]
     }
 
     method map {varname body} {
         upvar 1 $varname var
-        set res {}
+        set result {}
+
         if {$leftNode ne ""} {
-            set res [concat $res [$leftNode map $varname $body]]
+            set result [concat $result [$leftNode map $varname $body]]
         }
+
         if {$value ne ""} {
             set var [self]
-            lappend res [uplevel 1 $body]
+            lappend result [uplevel 1 $body]
         }
+
         if {$rightNode ne ""} {
-            set res [concat $res [$rightNode map $varname $body]]
+            set result [concat $result [$rightNode map $varname $body]]
         }
-        return $res
+
+        return $result
     }
 }

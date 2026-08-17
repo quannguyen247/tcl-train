@@ -1,35 +1,52 @@
-if {[file exists lib]} {
-    lappend auto_path lib
-    catch {package require permutations}
-    catch {interp alias {} permutations {} ::permutations::permutationsOfSize {1 2 3 4 5} 5}
-}
+lappend auto_path lib
+package require permutations
+
+interp alias {} permutations {} ::permutations::permutationsOfSize {1 2 3 4 5} 5
 
 oo::class create ZebraPuzzle {
-    variable houses
+    variable waterDrinker zebraOwner
 
     constructor {args} {
-        set houses {
-            1 {color Yellow nationality Norwegian drink Water        hobby Painter  pet Fox}
-            2 {color Blue   nationality Ukrainian drink Tea          hobby Reading  pet Horse}
-            3 {color Red    nationality Englishman drink Milk         hobby Dancing  pet Snails}
-            4 {color Ivory  nationality Spaniard  drink "Orange juice" hobby Football pet Dog}
-            5 {color Green  nationality Japanese  drink Coffee       hobby Chess    pet Zebra}
-        }
-    }
+        set perms [permutations]
 
-    method findResidentBy {attribute value} {
-        dict for {id house} $houses {
-            if {[dict get $house $attribute] eq $value} {
-                return [dict get $house nationality]
+        foreach color_perm $perms {
+            lassign $color_perm red green ivory yellow blue
+            if {$green != $ivory + 1 || $blue != 2} continue
+
+            foreach nat_perm $perms {
+                lassign $nat_perm englishman spaniard ukrainian norwegian japanese
+                if {$norwegian != 1 || $englishman != $red} continue
+
+                foreach drink_perm $perms {
+                    lassign $drink_perm coffee tea milk orangeJuice water
+                    if {$milk != 3 || $coffee != $green || $ukrainian != $tea} continue
+
+                    foreach hobby_perm $perms {
+                        lassign $hobby_perm dancing painter football chess reading
+                        if {$painter != $yellow || $football != $orangeJuice || $japanese != $chess} continue
+
+                        foreach pet_perm $perms {
+                            lassign $pet_perm dog snails fox horse zebra
+                            if {$spaniard != $dog || $snails != $dancing} continue
+                            if {abs($reading - $fox) != 1} continue
+                            if {abs($painter - $horse) != 1} continue
+
+                            set natMap [list $norwegian Norwegian $japanese Japanese $englishman Englishman $spaniard Spaniard $ukrainian Ukrainian]
+                            set waterDrinker [dict get $natMap $water]
+                            set zebraOwner [dict get $natMap $zebra]
+                            return
+                        }
+                    }
+                }
             }
         }
     }
 
     method drinksWater {} {
-        return [my findResidentBy drink "Water"]
+        return $waterDrinker
     }
 
     method ownsZebra {} {
-        return [my findResidentBy pet "Zebra"]
+        return $zebraOwner
     }
 }

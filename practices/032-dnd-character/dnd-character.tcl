@@ -1,9 +1,9 @@
 namespace eval dnd {
-    namespace export modifier ability character
+    namespace export character ability modifier
     namespace ensemble create
 
     proc modifier {score} {
-        return [expr {int(floor(($score - 10) / 2.0))}]
+        expr {int(floor(($score - 10) / 2.0))}
     }
 
     proc ability {} {
@@ -12,17 +12,18 @@ namespace eval dnd {
             lappend rolls [expr {int(rand() * 6) + 1}]
         }
         set sorted [lsort -integer $rolls]
-        return [expr {[lindex $sorted 1] + [lindex $sorted 2] + [lindex $sorted 3]}]
+        expr {[lindex $sorted 1] + [lindex $sorted 2] + [lindex $sorted 3]}
     }
 
     proc character {} {
         set str [ability]
         set dex [ability]
         set con [ability]
-        set intel [ability]
+        set int_ [ability]
         set wis [ability]
         set cha [ability]
         set hp [expr {10 + [modifier $con]}]
-        return [dict create strength $str dexterity $dex constitution $con intelligence $intel wisdom $wis charisma $cha hitpoints $hp]
+        dict create strength $str dexterity $dex constitution $con \
+            intelligence $int_ wisdom $wis charisma $cha hitpoints $hp
     }
 }

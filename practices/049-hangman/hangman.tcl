@@ -3,7 +3,6 @@ set masked [string repeat "_" [string length $word]]
 set remaining 9
 set status "ongoing"
 
-# Đếm và mở khóa chữ đoán đúng
 proc processGuess {letter} {
     global word masked remaining status
     if {$status ne "ongoing"} return
@@ -31,7 +30,6 @@ proc processGuess {letter} {
     }
 }
 
-# Xử lý lệnh STATUS, GUESS, SHUTDOWN từ Client qua Socket
 proc handleClient {sock} {
     global masked remaining status
     if {[gets $sock line] < 0} { close $sock; return }
@@ -45,7 +43,6 @@ proc handleClient {sock} {
         return
     }
 
-    # Trả về danh sách 3 phần tử [lượt_còn_lại chuỗi_che trạng_thái]
     puts $sock [list $remaining $masked $status]
     flush $sock
 
@@ -60,7 +57,6 @@ proc newClient {sock addr port} {
     fileevent $sock readable [list handleClient $sock]
 }
 
-# Khởi tạo Server TCP trên port 0
 proc startServer {} {
     set s [socket -server newClient 0]
     set sockInfo [chan configure $s -sockname]

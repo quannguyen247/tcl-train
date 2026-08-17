@@ -1,4 +1,4 @@
-oo::class create CustomSet {
+oo::class create Set {
     variable elems
 
     constructor {{elements {}}} {
@@ -65,7 +65,10 @@ oo::class create CustomSet {
     }
 
     method equals? {otherSet} {
-        return [expr {[my subset? $otherSet] && [$otherSet subset? [self]]}]
+        return [expr {
+            [my subset? $otherSet] &&
+            [$otherSet subset? [self]]
+        }]
     }
 
     method equals {otherSet} {
@@ -80,33 +83,39 @@ oo::class create CustomSet {
     }
 
     method intersection {otherSet} {
-        set res {}
+        set result {}
+
         foreach e $elems {
             if {[$otherSet contains? $e]} {
-                lappend res $e
+                lappend result $e
             }
         }
-        return [CustomSet new $res]
+
+        return [Set new $result]
     }
 
     method difference {otherSet} {
-        set res {}
+        set result {}
+
         foreach e $elems {
             if {![$otherSet contains? $e]} {
-                lappend res $e
+                lappend result $e
             }
         }
-        return [CustomSet new $res]
+
+        return [Set new $result]
     }
 
     method union {otherSet} {
-        set res $elems
+        set result $elems
+
         foreach e [$otherSet getElements] {
-            if {[lsearch -exact $res $e] == -1} {
-                lappend res $e
+            if {[lsearch -exact $result $e] == -1} {
+                lappend result $e
             }
         }
-        return [CustomSet new $res]
+
+        return [Set new $result]
     }
 
     method size {} {
@@ -117,5 +126,3 @@ oo::class create CustomSet {
         return [lsort -integer $elems]
     }
 }
-
-interp alias {} Set {} CustomSet

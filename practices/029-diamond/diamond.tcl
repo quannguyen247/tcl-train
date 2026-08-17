@@ -1,7 +1,6 @@
 proc makeRow {i n} {
     set c [format %c [expr {65 + $i}]]
-    set outer [expr {$n - $i}]
-    set outer_sp [string repeat " " $outer]
+    set outer_sp [string repeat " " [expr {$n - $i}]]
     if {$i == 0} {
         return "${outer_sp}${c}${outer_sp}"
     } else {
@@ -19,6 +18,5 @@ proc diamond {char} {
     for {set i [expr {$n - 1}]} {$i >= 0} {incr i -1} {
         lappend lines [makeRow $i $n]
     }
-    return [join $lines "
-"]
+    return [join $lines "\n"]
 }

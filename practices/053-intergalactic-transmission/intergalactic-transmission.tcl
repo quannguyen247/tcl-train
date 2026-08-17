@@ -1,7 +1,6 @@
 proc transmitSequence {message} {
     set bits {}
 
-    # Tách mỗi byte thành 8 bit
     foreach byte $message {
         for {set bit 7} {$bit >= 0} {incr bit -1} {
             lappend bits [expr {($byte >> $bit) & 1}]
@@ -18,14 +17,15 @@ proc transmitSequence {message} {
             set value [expr {$value * 2 + $bit}]
             incr ones $bit
         }
+
         while {[llength $data] < 7} {
             set value [expr {$value * 2}]
             lappend data 0
         }
 
-        # Parity là bit cuối, giúp tổng số bit 1 luôn chẵn
         lappend result [expr {($value << 1) | ($ones % 2)}]
     }
+
     return $result
 }
 
@@ -34,9 +34,11 @@ proc decodeMessage {transmission} {
 
     foreach byte $transmission {
         set ones 0
+
         for {set bit 0} {$bit < 8} {incr bit} {
             incr ones [expr {($byte >> $bit) & 1}]
         }
+
         if {$ones % 2} {
             error "wrong parity"
         }
@@ -49,11 +51,13 @@ proc decodeMessage {transmission} {
     set message {}
     for {set i 0} {$i + 7 < [llength $bits]} {incr i 8} {
         set byte 0
+
         foreach bit [lrange $bits $i [expr {$i + 7}]] {
             set byte [expr {$byte * 2 + $bit}]
         }
+
         lappend message $byte
     }
+
     return $message
 }
-

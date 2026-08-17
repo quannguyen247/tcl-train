@@ -18,6 +18,7 @@ oo::class create GoBoard {
         if {[string index [lindex $board $y] $x] ne " "} {
             return [list none {}]
         }
+
         if {[dict exists $cache $intersection]} {
             return [dict get $cache $intersection]
         }
@@ -27,7 +28,6 @@ oo::class create GoBoard {
         set points {}
         set borders {}
 
-        # Loang qua bốn ô kề.
         for {set i 0} {$i < [llength $queue]} {incr i} {
             lassign [lindex $queue $i] cx cy
             lappend points [list $cx $cy]
@@ -59,9 +59,11 @@ oo::class create GoBoard {
 
         set points [lsort -dictionary $points]
         set area [list $owner $points]
+
         foreach point $points {
             dict set cache $point $area
         }
+
         dict lappend totals $owner {*}$points
         return $area
     }
@@ -70,6 +72,7 @@ oo::class create GoBoard {
         for {set y 0} {$y < $height} {incr y} {
             for {set x 0} {$x < $width} {incr x} {
                 set point [list $x $y]
+
                 if {[string index [lindex $board $y] $x] eq " "
                     && ![dict exists $cache $point]} {
                     my territory $point
@@ -82,4 +85,3 @@ oo::class create GoBoard {
         return $totals
     }
 }
-

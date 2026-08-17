@@ -1,8 +1,11 @@
-proc encrypt {text} {
-    set clean [string tolower [regsub -all {[^a-zA-Z0-9]} $text ""]]
-    set len [string length $clean]
-    if {$len == 0} { return "" }
-    
+proc encrypt {plaintext} {
+    set cleaned_plaintext [string tolower [regsub -all {[^a-zA-Z0-9]} $plaintext ""]]
+    set len [string length $cleaned_plaintext]
+
+    if {$len == 0} {
+        return ""
+    }
+
     set r 1
     set c 1
     while {$r * $c < $len} {
@@ -12,21 +15,21 @@ proc encrypt {text} {
             incr c
         }
     }
-    
+
     set target_len [expr {$r * $c}]
-    set padded $clean
-    while {[string length $padded] < $target_len} {
-        append padded " "
+    while {[string length $cleaned_plaintext] < $target_len} {
+        append cleaned_plaintext " "
     }
-    
-    set columns {}
+
+    set chunks {}
     for {set col 0} {$col < $c} {incr col} {
-        set col_str ""
+        set chunk ""
         for {set row 0} {$row < $r} {incr row} {
             set idx [expr {$row * $c + $col}]
-            append col_str [string index $padded $idx]
+            append chunk [string index $cleaned_plaintext $idx]
         }
-        lappend columns $col_str
+        lappend chunks $chunk
     }
-    return [join $columns " "]
+
+    return [join $chunks " "]
 }

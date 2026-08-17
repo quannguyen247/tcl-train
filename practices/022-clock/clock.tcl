@@ -1,39 +1,32 @@
 oo::class create Clock {
     variable minutes
 
-    constructor {h m} {
-        set total [expr {($h * 60 + $m) % 1440}]
+    constructor {hour minute} {
+        set total [expr {($hour * 60 + $minute) % 1440}]
         if {$total < 0} {
-            set total [expr {$total + 1440}]
+            incr total 1440
         }
         set minutes $total
     }
 
-    method getMinutes {} {
-        return $minutes
-    }
-
     method toString {} {
-        set h [expr {$minutes / 60}]
-        set m [expr {$minutes % 60}]
-        return [format "%02d:%02d" $h $m]
+        format "%02d:%02d" [expr {$minutes / 60}] [expr {$minutes % 60}]
     }
 
-    method add {m} {
-        return [Clock new 0 [expr {$minutes + $m}]]
+    method add {mins} {
+        return [Clock new 0 [expr {$minutes + $mins}]]
     }
 
-    method subtract {m} {
-        return [Clock new 0 [expr {$minutes - $m}]]
+    method subtract {mins} {
+        return [Clock new 0 [expr {$minutes - $mins}]]
     }
 
     method equals {other} {
-        return [expr {$minutes == [$other getMinutes]}]
+        expr {[my toString] eq [$other toString]}
     }
 
     method == {other} {
-        return [my equals $other]
+        my equals $other
     }
-
     export ==
 }
