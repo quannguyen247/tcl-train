@@ -31,18 +31,44 @@ class Result:
     output: str = ""
 
 
-def find_tclsh() -> str:
-    """Return a usable Tcl interpreter or fail with a clear message."""
+def tcl_version(candidate: str) -> tuple[int, int] | None:
+    """Return the interpreter's major/minor version."""
+    try:
+        completed = subprocess.run(
+            [candidate],
+            input="puts [info tclversion]\n",
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=10,
+            check=False,
+        )
+        match = re.search(r"(\d+)\.(\d+)", completed.stdout)
+        return tuple(map(int, match.groups())) if match else None
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+
+def find_tclsh(explicit: str | None) -> str:
+    """Return a Tcl 9 interpreter or fail with a clear message."""
     candidates = [
+        explicit,
+        shutil.which("tclsh90"),
+        shutil.which("tclsh9.0"),
         shutil.which("tclsh"),
         shutil.which("tclsh.exe"),
+        r"C:\Tcl\bin\tclsh90.exe",
         r"C:\Tcl\bin\tclsh.exe",
         r"C:\Program Files\Tcl\bin\tclsh.exe",
     ]
     for candidate in candidates:
-        if candidate and Path(candidate).exists():
+        if candidate and Path(candidate).exists() and (tcl_version(candidate) or (0, 0)) >= (9, 0):
             return str(candidate)
-    raise FileNotFoundError("tclsh was not found in PATH or a standard Windows location")
+    raise FileNotFoundError(
+        "Tcl 9.0 or newer was not found. Install Tcl 9 or pass "
+        "--tclsh C:\\path\\to\\tclsh90.exe"
+    )
 
 
 def classify(test_file: Path, tclsh: str, timeout: int) -> Result:
@@ -87,6 +113,7 @@ def classify(test_file: Path, tclsh: str, timeout: int) -> Result:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--tclsh", help="path to a Tcl 9 interpreter")
     parser.add_argument("--timeout", type=int, default=30, help="seconds allowed per suite")
     parser.add_argument("--verbose", action="store_true", help="show output for non-passing suites")
     args = parser.parse_args()
@@ -103,7 +130,7 @@ def main() -> int:
         return 2
 
     try:
-        tclsh = find_tclsh()
+        tclsh = find_tclsh(args.tclsh)
     except FileNotFoundError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2

@@ -48,7 +48,7 @@ the upstream test helper required to enable the full test set.
 
 ## Run the complete practice suite
 
-Install Tcl 8.6 or newer and ensure `tclsh` is available in `PATH`, then run:
+Install Tcl 9.0 or newer and ensure `tclsh90` is available in `PATH`, then run:
 
 ```powershell
 python run_all_tests.py
@@ -56,6 +56,12 @@ python run_all_tests.py
 
 The runner enables every Exercism test case and returns a non-zero exit code
 when any suite fails, errors, times out, or remains unimplemented.
+
+To use a portable Tcl 9 build without changing `PATH`:
+
+```powershell
+python run_all_tests.py --tclsh C:\path\to\tclsh90.exe
+```
 
 ## Coding conventions
 
