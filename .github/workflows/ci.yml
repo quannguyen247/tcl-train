@@ -14,10 +14,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
+    outputs:
+      cache-hit: ${{ steps.cache-tcl.outputs.cache-hit }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,7 +28,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.local/tcl90
-          key: ${{ runner.os }}-tcl-9.0.4-thread-3.0.6-v1
+          key: ${{ runner.os }}-tcl-9.0.4-thread-3.0.6-v4
 
       - name: Install build dependencies
         if: steps.cache-tcl.outputs.cache-hit != 'true'
@@ -65,46 +66,40 @@ jobs:
           puts "Thread [package require Thread]"
           TCL
 
-      - name: Run every test case
-        shell: bash
+  generate-matrix:
+    name: Discover Tests
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Matrix
+        id: set-matrix
         run: |
-          set +e
+          DIRS=$(cd practices && ls -d */ | sed 's#/##' | jq -R -s -c 'split("\n")[:-1]')
+          echo "matrix=$DIRS" >> $GITHUB_OUTPUT
+
+  test:
+    name: ${{ matrix.practice }}
+    needs: [build, generate-matrix]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        practice: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore Tcl Environment
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.local/tcl90
+          key: ${{ runner.os }}-tcl-9.0.4-thread-3.0.6-v4
+
+      - name: Run ${{ matrix.practice }} Test
+        run: |
+          export RUN_ALL=1
+          cd practices/${{ matrix.practice }}
           TCLSH="$(find "$HOME/.local/tcl90/bin" -maxdepth 1 -type f -name 'tclsh*' | sort | head -n 1)"
-          mapfile -t TESTS < <(find practices -mindepth 2 -maxdepth 2 -type f -name '*.test.tcl' | sort)
-
-          total=${#TESTS[@]}
-          passed=0
-          failed=0
-
-          for test_file in "${TESTS[@]}"; do
-            exercise="$(basename "$(dirname "$test_file")")"
-            test_name="$(basename "$test_file")"
-
-            echo "::group::$exercise"
-            (
-              cd "$(dirname "$test_file")"
-              RUN_ALL=1 "$TCLSH" "$test_name" -verbose p
-            )
-            status=$?
-
-            if (( status == 0 )); then
-              ((passed += 1))
-              echo "SUITE PASS: $exercise"
-            else
-              ((failed += 1))
-              echo "::error title=Suite failed::$exercise exited with status $status"
-            fi
-            echo "::endgroup::"
-          done
-
-          echo "Suite summary: total=$total passed=$passed failed=$failed"
-          {
-            echo "## Tcl practice test summary"
-            echo
-            echo "| Total | Passed | Failed |"
-            echo "| ---: | ---: | ---: |"
-            echo "| $total | $passed | $failed |"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-          test "$total" -eq 135
-          test "$failed" -eq 0
+          test_file=$(ls *.test.tcl)
+          "$TCLSH" "$test_file" -verbose p
