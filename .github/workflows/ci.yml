@@ -1,0 +1,35 @@
+name: Tcl Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Tcl 9.0 build
+        id: cache-tcl
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/tclsh9.0
+          key: ${{ runner.os }}-tcl-9.0.0
+
+      - name: Install Tcl 9.0 from source
+        if: steps.cache-tcl.outputs.cache-hit != 'true'
+        run: |
+          wget https://prdownloads.sourceforge.net/tcl/tcl9.0.0-src.tar.gz
+          tar xfz tcl9.0.0-src.tar.gz
+          cd tcl9.0.0/unix
+          ./configure
+          make
+          sudo make install
+
+      - name: Run Test Suite
+        run: python3 run_all_tests.py
