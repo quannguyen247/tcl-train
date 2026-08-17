@@ -1,38 +1,38 @@
 # Tcl for EDA, DFT, and Problem Solving
 
-This repository is an English-language Tcl learning path that combines:
+An English-language Tcl learning repository combining:
 
 - focused language lessons in [`courses/`](courses/);
-- 135 active Exercism Tcl exercises in [`practices/`](practices/);
-- Vivado-oriented automation examples in [`vivado/`](vivado/);
-- a larger applied project in [`capstone/`](capstone/).
+- 135 active Exercism solutions in [`practices/`](practices/);
+- Vivado automation examples in [`vivado/`](vivado/);
+- an applied project in [`capstone/`](capstone/).
 
-The material emphasizes readable, idiomatic Tcl that transfers to ASIC/FPGA,
-EDA, physical-design, and DFT automation.
+The examples emphasize readable Tcl that transfers to ASIC/FPGA, EDA,
+physical-design, and DFT automation.
 
 ## Repository layout
 
 ```text
 tcl-train/
-├── README.md
-├── NOTE.md
-├── roadmap.md
-├── run_all_tests.py
-├── courses/
-├── practices/
-├── vivado/
-└── capstone/
+|-- .github/workflows/ci.yml
+|-- README.md
+|-- NOTE.md
+|-- roadmap.md
+|-- courses/
+|-- practices/
+|-- vivado/
+`-- capstone/
 ```
 
-## Practice exercises
+## Practice collection
 
-The collection follows the 135 active practice exercises in the Exercism Tcl
-track as checked on August 11, 2026. Exercise tests and instructions were
-refreshed from `exercism/tcl` commit
-`c42295e0b80f25ec0241d0d49756544c89e3f828`.
+The repository follows the 135 exercises marked active by the Exercism Tcl
+track on August 11, 2026. Tests and instructions were refreshed from
+`exercism/tcl` commit `c42295e0b80f25ec0241d0d49756544c89e3f828`.
 
-Five exercises present in the older 140-exercise snapshot are now deprecated
-and are intentionally excluded:
+The repository contains 135 practice exercises, aligning perfectly with the active exercises currently published on the Exercism web platform for the Tcl track.
+
+Historically, the upstream `exercism/tcl` repository contained 140 exercises. Five of these were subsequently deprecated and removed by the track maintainers. To maintain stable directory identifiers and preserve existing references, the local directories have not been renumbered. Consequently, the directory prefixes range up to `140`, intentionally skipping the five deprecated exercises:
 
 - `accumulate`
 - `beer-song`
@@ -40,43 +40,59 @@ and are intentionally excluded:
 - `minesweeper`
 - `scale-generator`
 
-Exercism can update the track later, so 135 is a verified snapshot rather than
-a permanent platform guarantee.
+Solutions were compared against the author's Exercism GitHub Syncer backup.
+The latest synced iteration is used after removing comments and normalizing
+formatting. Two compatibility additions are retained:
 
-Each exercise directory contains its instructions, solution, test suite, and
-the upstream test helper required to enable the full test set.
+- `paasio` normalizes file output to LF so byte counts are stable on Windows.
+- `zebra-puzzle` includes its required upstream `lib/permutations` package.
 
-## Run the complete practice suite
+## Requirements
 
-Install Tcl 9.0 or newer and ensure `tclsh90` is available in `PATH`, then run:
+- Tcl 9.0 or newer
+- Thread extension 3.0 or newer
+
+The verified local environment is Tcl 9.0.4 with Thread 3.0.6.
+
+## Run one exercise
+
+PowerShell:
 
 ```powershell
-python run_all_tests.py
+$env:RUN_ALL = "1"
+cd practices/002-acronym
+C:\Users\Quan\AppData\Local\Apps\Tcl90\bin\tclsh90.exe acronym.test.tcl -verbose p
 ```
 
-The runner enables every Exercism test case and returns a non-zero exit code
-when any suite fails, errors, times out, or remains unimplemented.
+The `-verbose p` option prints every passing test case. A failing case already
+prints its body, actual result, expected result, and stack trace through
+`tcltest`.
 
-To use a portable Tcl 9 build without changing `PATH`:
+## Continuous integration
 
-```powershell
-python run_all_tests.py --tclsh C:\path\to\tclsh90.exe
-```
+GitHub Actions builds pinned Tcl 9.0.4 and Thread 3.0.6 releases, then runs all
+135 suites directly. The workflow:
+
+- enables every Exercism case with `RUN_ALL=1`;
+- prints every passing case as `++++ case-name PASSED`;
+- preserves full failure details;
+- groups logs by exercise;
+- writes a suite summary to the Actions job summary;
+- fails if fewer than 135 suites are found or any suite fails.
 
 ## Coding conventions
 
 - Use four spaces for indentation.
 - Brace expressions passed to `if`, `while`, and `expr`.
-- Prefer Tcl list and dictionary commands over string-shaped data handling.
-- Keep procedures small and explicit about mutation.
-- Comment decisions and edge cases, not obvious syntax.
-- Preserve an exercise's required public API.
+- Use list and dictionary commands instead of string-shaped data manipulation.
+- Keep required exercise APIs unchanged.
+- Prefer clear control flow over code golf.
+- Keep problem statements in `README.md`, not in solution comments.
 
 ## Attribution
 
-The practice statements and tests come from the open-source
-[Exercism Tcl track](https://github.com/exercism/tcl). Solutions in this
-repository are the author's work, including iterations backed up through the
-Exercism GitHub Syncer.
+Practice statements and tests come from the open-source
+[Exercism Tcl track](https://github.com/exercism/tcl). Solutions are the
+author's submitted iterations backed up through Exercism GitHub Syncer.
 
 Maintained by [quannguyen247](https://github.com/quannguyen247).
