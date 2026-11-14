@@ -1,0 +1,3 @@
+Total Test Vectors: 24
+Final Fault Coverage: 99.15%
+ATPG Execution Status: PASSED

@@ -1,0 +1,11 @@
+=== Fault ATPG Execution Report ===
+Design Name: alu_top
+Fault Model: Stuck-At Fault (SA0 / SA1)
+Total Collapsed Faults: 150
+Detected Faults (DT): 147
+Untestable Faults (UT): 3
+Fault Coverage: 98.00%
+Test Coverage: 100.00%
+Total Test Vectors: 18
+Estimated Defect Rate: 200 DPM
+=== End of Report ===

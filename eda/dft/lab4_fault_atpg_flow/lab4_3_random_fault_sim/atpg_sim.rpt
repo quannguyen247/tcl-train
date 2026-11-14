@@ -1,0 +1,5 @@
+=== Deterministic ATPG Simulation ===
+Total Vectors Applied: 18
+Simulated Faults: 150
+Detected Faults: 147
+Fault Coverage: 98.00%

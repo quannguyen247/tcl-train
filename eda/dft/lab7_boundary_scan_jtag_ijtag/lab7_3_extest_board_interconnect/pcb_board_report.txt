@@ -1,0 +1,4 @@
+# PCB Board Interconnect Netlist
+NET_DATA[0]: ChipA.Pin12 -> ChipB.Pin45 | STATUS = OK
+NET_DATA[1]: ChipA.Pin13 -> ChipB.Pin46 | STATUS = SHORT_TO_NET_DATA[2]
+NET_DATA[3]: ChipA.Pin15 -> ChipB.Pin48 | STATUS = OK

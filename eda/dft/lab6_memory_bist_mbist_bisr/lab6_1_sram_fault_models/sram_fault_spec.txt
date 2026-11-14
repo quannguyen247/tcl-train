@@ -1,0 +1,5 @@
+# SRAM Fault Library Specification
+FAULT_TYPE = SAF | TARGET = cell_0x12A | BEHAVIOR = fails to toggle
+FAULT_TYPE = TF  | TARGET = cell_0x3B4 | BEHAVIOR = slow to charge
+FAULT_TYPE = CFid| AGGRESSOR = cell_0x004 | VICTIM = cell_0x005 | BEHAVIOR = forces Victim to 0
+FAULT_TYPE = AF  | ADDRESS = 0x010 | BEHAVIOR = selects dual cells (0x010, 0x011)

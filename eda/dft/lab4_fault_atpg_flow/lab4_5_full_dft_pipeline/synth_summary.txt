@@ -1,0 +1,5 @@
+Top Module Name: alu_top
+Total Gate Count: 245
+Scan Chain Count: 1
+Scan Chain Length: 32 bits
+DFT DRC Violations: 0

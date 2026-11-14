@@ -1,0 +1,4 @@
+POLYNOMIAL = x^8 + x^6 + x^5 + x + 1
+BIT_WIDTH = 8
+INITIAL_SEED = 0x01
+MAX_PERIOD = 255

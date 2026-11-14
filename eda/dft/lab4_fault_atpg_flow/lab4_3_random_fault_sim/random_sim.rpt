@@ -1,0 +1,5 @@
+=== Random Pattern Fault Simulation ===
+Total Vectors Applied: 100
+Simulated Faults: 150
+Detected Faults: 108
+Fault Coverage: 72.00%

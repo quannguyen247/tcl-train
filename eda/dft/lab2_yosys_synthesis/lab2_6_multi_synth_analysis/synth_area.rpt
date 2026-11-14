@@ -1,0 +1,4 @@
+=== Strategy 1: Area-Optimized ===
+   Chip area for module 'alu_top': 120.50 gate_units
+   Sequential Area: 40.00
+   Combinational Area: 80.50

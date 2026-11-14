@@ -1,0 +1,4 @@
+# SRAM Defect Coordinate Map (Row, Col)
+FAIL_POINT = (Row 42, Col 7)
+FAIL_POINT = (Row 42, Col 19)
+FAIL_POINT = (Row 105, Col 7)
