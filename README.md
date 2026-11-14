@@ -1,60 +1,55 @@
-# Tcl Training: EDA Automation
+# Tcl training
 
-`tcl-train` is a comprehensive Tcl learning and reference repository tailored for semiconductor engineering and IC design automation.
+Learn Tcl through small exercises, then use it to automate EDA tools.
 
-Tcl (Tool Command Language) is the industry-standard scripting interface across electronic design automation (EDA) software suites—including RTL design, Logic Synthesis, Static Timing Analysis (STA), Physical Design (PD), and Design for Testability (DFT).
+## Choose a starting point
 
-This repository provides structured lessons, 135 algorithm practice suites, Vivado tool scripts, and real-world EDA automation workflows.
+| Track | Start here |
+| --- | --- |
+| Tcl language | [Courses](courses/01-introduction/README.md), then the exercises in `practices/`. |
+| Design for test | [DFT learning path](eda/dft/README.md): synthesis, scan, fault tests and a small ASIC capstone. |
+| FPGA automation | [Vivado Tcl examples](eda/vivado/README.md). |
+| Synthesis scripts | [Yosys template](eda/yosys/README.md). |
 
----
+Each DFT lesson identifies the input files, the command to run and what to inspect. Start with Labs 1-4 and the scan-counter capstone. The later labs introduce compression, memory test, JTAG, logic BIST and testability through small models.
 
-## Repository Structure
+## Run an exercise
+
+Most language lessons need Tcl only:
+
+```sh
+tclsh path/to/exercise.tcl
+```
+
+The algorithm practice suites need Tcl 9.0+ and Thread 3.0+. CI tests Tcl 9.1.0 with Thread 3.0.7. From the repository root:
+
+```sh
+cd practices/002-acronym
+RUN_ALL=1 tclsh acronym.test.tcl -verbose p
+```
+
+There are 135 practice directories. Their numbering ends at 140 because five deprecated exercises retain their old numbers as gaps.
+
+For the DFT checks, install Python 3, Tcl 8.6 or newer and Yosys, then run:
+
+```sh
+python3 eda/dft/run_labs.py
+```
+
+Use `--fault` to include native Fault examples and `--questa` to include RTL and scan-chain simulations. Those options require the corresponding installed tools and, for Questa, a usable license. The runner works in a temporary copy so it keeps generated files out of the course.
+
+## Repository layout
 
 ```text
-tcl-train/
-├── courses/          # Core Tcl syntax and language fundamentals
-├── practices/        # 135 algorithm practice suites
-├── vivado/           # Xilinx Vivado automation scripts
-├── capstone/         # Applied EDA workflow project
-├── NOTE.md           # Reusable Tcl patterns, idioms, and techniques
-├── LICENSE           # MIT License
-└── README.md
+courses/         Tcl lessons
+practices/       Algorithm exercises and Tcltest suites
+eda/dft/         DFT lessons, fixtures and scan-counter capstone
+eda/vivado/      Vivado automation examples
+eda/yosys/       Generic synthesis template
+capstone/        Tcl application project
+NOTE.md          Tcl reference notes
 ```
 
----
+GitHub Actions runs the Tcl practice suites and the DFT lesson checks. Physical implementation and licensed-tool simulations are optional local runs.
 
-## Practices Overview
-
-The `practices/` directory contains 135 standalone practice exercises. The directory numbering extends up to `140` to maintain stable historical references, skipping 5 deprecated upstream track items (`accumulate`, `beer-song`, `diffie-hellman`, `minesweeper`, `scale-generator`).
-
-### Technical Compatibility
-- **`paasio`**: Enforces LF line endings for deterministic cross-platform byte counts on Windows and Linux.
-- **`zebra-puzzle`**: Bundles the required upstream `lib/permutations` package for standalone local execution.
-
----
-
-## Getting Started
-
-### Prerequisites
-- **Tcl**: 9.0+ (Tested on Tcl 9.0.4)
-- **Thread Extension**: 3.0+ (Tested on Thread 3.0.6)
-
-### Running Tests Locally
-
-Run an individual test suite using `tclsh90`:
-
-```powershell
-$env:RUN_ALL = "1"
-cd practices/002-acronym
-tclsh90 acronym.test.tcl -verbose p
-```
-
-### Continuous Integration (CI)
-
-GitHub Actions runs automated testing via a **Matrix Strategy** (135 parallel jobs), ensuring every exercise suite is independently validated on every push.
-
----
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
+[MIT License](LICENSE). Fault+ itself is maintained in the separate [fault-plus repository](https://github.com/quannguyen247/fault-plus).
